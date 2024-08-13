@@ -1,3 +1,12 @@
+#' Example data for validation
+#'
+#' @name data_to_check
+#' @docType data
+#' @format list object with name, nsa and sa time series
+#' @keywords data
+NULL
+
+
 #' Extract combined test for seasonality on linearised series
 #'
 #' @param sa_mod An SA object from RJDemetra
