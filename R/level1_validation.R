@@ -86,13 +86,13 @@ check_over_adjustment <- function(sa_mod,pval=0.05){
   lin_sa <- sa_mod$user_defined$`preprocessing.model.y_lin` |>
     diff()
   n <- length(lin_sa)
-  p <- frequency(lin_sa)
+  p <- stats::frequency(lin_sa)
 
-  acf_to_lag_p <- acf(lin_sa,lag.max = p,plot=FALSE)
+  acf_to_lag_p <- stats::acf(lin_sa,lag.max = p,plot=FALSE)
   acf_lag_4 <- acf_to_lag_p$acf[p+1,1,1]
 
 
-  result <- acf_lag_4 < qnorm(pval)/sqrt(n)
+  result <- acf_lag_4 < stats::qnorm(pval)/sqrt(n)
   return(result)
 }
 
@@ -116,18 +116,18 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
   if(default_type=="TS"){
     nsa_mod <- RJDemetra::tramoseats(nsa,
                                      spec = default_spec_nsa,
-                                     userdefined = user_defined_variables("TRAMO-SEATS"))
+                                     userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
     sa_mod <- RJDemetra::tramoseats(sa,
                                     spec = default_spec_sa,
-                                    userdefined = user_defined_variables("TRAMO-SEATS"))
+                                    userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
   }
   if(default_type=="X13"){
     nsa_mod <- RJDemetra::x13(nsa,
                               spec = default_spec_nsa,
-                              userdefined = user_defined_variables("X13-ARIMA"))
+                              userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
     sa_mod <- RJDemetra::x13(sa,
                              spec = default_spec_sa,
-                             userdefined = user_defined_variables("X13-ARIMA"))
+                             userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
   }
 
 
