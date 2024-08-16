@@ -156,6 +156,21 @@ annual_totals_plot <- function(nsa,sa, title = NULL){
 }
 
 
+#' Plot of calendar effects
+#'
+#' @param nsa ts object (usually unadjusted time series)
+#' @param sa ts object (usually seasonally adjusted time series)
+#' @param sa_mod An SA object from RJDemetra
+#' @param title optional title
+#' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
+#' @param default_spec_nsa name of a default JDemetra+ specification to use for determining decomposition mode (default is  "RSA2c")
+#'
+#' @return A plot of calendar effects and derived adjusted effects
+#' @export
+#'
+#' @examples
+#' test_sa_mod <- RJDemetra::x13(data_to_check$sa,spec="RSA2c", userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
+#' cal_effect_plot(data_to_check$nsa,data_to_check$sa,test_sa_mod)
 cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", default_spec_nsa="RSA2c"){
 
   check_nsa_sa_ts(nsa,sa)

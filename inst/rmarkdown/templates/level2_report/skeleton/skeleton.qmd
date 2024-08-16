@@ -41,37 +41,40 @@ if(!is.ts(nsa)){stop(paste("nsa is not a time series it has class",class(nsa),ns
 
 start_yr <- as.numeric(substr(params$start_date,1,4))
 
-l1_out <- capture.output(level1_validation(nsa,sa))
+l1_out <- capture.output(level1_validation(nsa,sa,
+                                           default_type = default_type,
+                                           default_spec_nsa = default_spec_nsa,
+                                           default_spec_sa = default_spec_sa))
 
 start_5yr <- end(nsa)-5
 
 if(default_type=="TS"){
     nsa_mod <- RJDemetra::tramoseats(nsa,
                                      spec = default_spec_nsa,
-                                     userdefined = user_defined_variables("TRAMO-SEATS"))
+                                     userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
     sa_mod <- RJDemetra::tramoseats(sa,
                                     spec = default_spec_sa,
-                                    userdefined = user_defined_variables("TRAMO-SEATS"))
+                                    userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
     nsa_mod5 <- RJDemetra::tramoseats(window(nsa,start=start_5yr),
                                      spec = default_spec_nsa,
-                                     userdefined = user_defined_variables("TRAMO-SEATS"))
+                                     userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
     sa_mod5 <- RJDemetra::tramoseats(window(sa,start=start_5yr),
                                     spec = default_spec_sa,
-                                    userdefined = user_defined_variables("TRAMO-SEATS"))
+                                    userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
   }
 if(default_type=="X13"){
     nsa_mod <- RJDemetra::x13(nsa,
                               spec = default_spec_nsa,
-                              userdefined = user_defined_variables("X13-ARIMA"))
+                              userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
     sa_mod <- RJDemetra::x13(sa,
                              spec = default_spec_sa,
-                             userdefined = user_defined_variables("X13-ARIMA"))
+                             userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
     nsa_mod5 <- RJDemetra::x13(window(nsa,start=start_5yr),
                                      spec = default_spec_nsa,
-                                     userdefined = user_defined_variables("X13-ARIMA"))
+                                     userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
     sa_mod5 <- RJDemetra::x13(window(sa,start=start_5yr),
                                     spec = default_spec_sa,
-                                    userdefined = user_defined_variables("X13-ARIMA"))
+                                    userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
 
   }
 ```
@@ -300,7 +303,7 @@ if(comb_test_res=="None"){
 
 message_to_print
 
-tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
        `Test statistic` = c(nsa_mod$user_defined$`diagnostics.seas-lin-f`[1],
                             nsa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
                             nsa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
@@ -311,7 +314,7 @@ tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
                      nsa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
                      nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
                      nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
-  mutate(`P-value` = cell_spec(round(`P-value`,3),
+  dplyr::mutate(`P-value` = cell_spec(round(`P-value`,3),
                                background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
   kable(digits = 3)
 ```
@@ -338,7 +341,7 @@ if(comb_test_res=="None"){
 message_to_print
 
 
-tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
        `Test statistic` = c(nsa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
                             nsa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
                             nsa_mod5$user_defined$`diagnostics.seas-lin-kw`[1],
@@ -349,7 +352,7 @@ tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
                      nsa_mod5$user_defined$`diagnostics.seas-lin-kw`[2],
                      nsa_mod5$user_defined$`diagnostics.seas-lin-friedman`[2],
                      nsa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
-  mutate(`P-value` = cell_spec(round(`P-value`,3),
+  dplyr::mutate(`P-value` = cell_spec(round(`P-value`,3),
                                background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
   kable(digits = 3)
 
@@ -377,7 +380,7 @@ if(comb_test_res=="None"){
 message_to_print
 
 
-tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
        `Test statistic` = c(sa_mod$user_defined$`diagnostics.seas-lin-f`[1],
                             sa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
                             sa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
@@ -388,7 +391,7 @@ tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
                      sa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
                      sa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
                      sa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
-  mutate(`P-value` = cell_spec(round(`P-value`,3),
+  dplyr::mutate(`P-value` = cell_spec(round(`P-value`,3),
                                background = ifelse(`P-value`<=0.05,"#FFCDCD","#DAFFCD")) ) |>
   kable(digits = 3)
 ```
@@ -413,7 +416,7 @@ if(comb_test_res=="None"){
 
 message_to_print
 
-tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
        `Test statistic` = c(sa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
                             sa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
                             sa_mod5$user_defined$`diagnostics.seas-lin-kw`[1],
@@ -424,7 +427,7 @@ tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
                      sa_mod5$user_defined$`diagnostics.seas-lin-kw`[2],
                      sa_mod5$user_defined$`diagnostics.seas-lin-friedman`[2],
                      sa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
-  mutate(`P-value` = cell_spec(round(`P-value`,3),
+  dplyr::mutate(`P-value` = cell_spec(round(`P-value`,3),
                                background = ifelse(`P-value`<=0.05,"#FFCDCD","#DAFFCD")) ) |>
   kable(digits = 3)
 
@@ -468,26 +471,26 @@ if(!is.null(chart_to_print)){chart_to_print}
 ```{r}
 #| title: "Annual totals check: top 5 largest absolute relative differences between NSA and SA annual totals"
 
- annual_totals <- tibble(Date = as.Date(time(sa)),NSA=nsa,SA=sa) |>
-          mutate(year = year(Date),
-                 quarter = quarter(Date))|> 
-          group_by(year) |>
-          summarise(nsa_total = sum(NSA),
+ annual_totals <- dplyr::tibble(Date = zoo::as.Date(stats::time(sa)),NSA=nsa,SA=sa) |>
+          dplyr::mutate(year = lubridate::year(Date),
+                 quarter = lubridate::quarter(Date))|> 
+          dplyr::group_by(year) |>
+          dplyr::summarise(nsa_total = sum(NSA),
                     sa_total = sum(SA),
                     full_yr_check = sum(quarter)) |>
-          filter(full_yr_check == 10)|>
-          mutate(abs_rel_diff =  abs(nsa_total-sa_total)/((4/sqrt(length(nsa)))*sqrt(sum(nsa^2)))) |>
-  select(year,nsa_total,sa_total,abs_rel_diff) |>
-  arrange(-abs_rel_diff) |>
-  mutate(`Absolute relative difference`=cell_spec(round(abs_rel_diff,3),background = ifelse(abs_rel_diff<=0.01 ,"#DAFFCD","#FFCDCD")))
+          dplyr::filter(full_yr_check == 10)|>
+          dplyr::mutate(abs_rel_diff =  abs(nsa_total-sa_total)/((4/sqrt(length(nsa)))*sqrt(sum(nsa^2)))) |>
+  dplyr::select(year,nsa_total,sa_total,abs_rel_diff) |>
+  dplyr::arrange(-abs_rel_diff) |>
+  dplyr::mutate(`Absolute relative difference`=cell_spec(round(abs_rel_diff,3),background = ifelse(abs_rel_diff<=0.01 ,"#DAFFCD","#FFCDCD")))
 
   
 annual_totals[1:5,] |> 
-  rename(Year=year,
+  dplyr::rename(Year=year,
          `NSA total` = nsa_total,
          `SA total` = sa_total
          ) |>
-  select(-abs_rel_diff)|>
+  dplyr::select(-abs_rel_diff)|>
   kable(digits = 3)
 ```
 
@@ -496,8 +499,8 @@ annual_totals[1:5,] |>
 #| title: Tests for randomness in the diffence of NSA and SA annual totals
 
 
-nsa_annual <- aggregate.ts(nsa,nfrequency = 1)
-sa_annual <- aggregate.ts(sa,nfrequency = 1)
+nsa_annual <- stats::aggregate.ts(nsa,nfrequency = 1)
+sa_annual <- stats::aggregate.ts(sa,nfrequency = 1)
 
 annual_totals_diff <- nsa_annual-sa_annual
 
@@ -506,10 +509,10 @@ updowntest <- rjd3toolkit::testofupdownruns(annual_totals_diff)
 
 
 
-tibble(Test = c("Runs test","Up down test"), 
+dplyr::tibble(Test = c("Runs test","Up down test"), 
        Value = c(runstest$value,updowntest$value),
        `p-value` = c(runstest$pvalue,updowntest$pvalue))|>
-  mutate(`p-value`=cell_spec(round(`p-value`,3),
+  dplyr::mutate(`p-value`=cell_spec(round(`p-value`,3),
                              background=(ifelse(`p-value`<=0.05 ,"#FFCDCD","#DAFFCD")))
          )|>
   kable(digits = 3)
@@ -524,10 +527,10 @@ tibble(Test = c("Runs test","Up down test"),
 
 if(check_negatives(sa)){
   message_to_print <- kable("SA series has negative values",col.names = NULL) |> row_spec(1,background = "#FFCDCD")
-  tab_to_print <- tibble(Date=as.Date(time(sa)),
+  tab_to_print <- dplyr::tibble(Date=zoo::as.Date(stats::time(sa)),
          SA=sa)|>
-         filter(sa<0)|>
-         mutate(SA = cell_spec(SA,background = "#FFCDCD"))
+         dplyr::filter(sa<0)|>
+         dplyr::mutate(SA = cell_spec(SA,background = "#FFCDCD"))
     kable(digits = 3)
 }else{
     message_to_print <- 
@@ -553,10 +556,10 @@ if(!is.null(tab_to_print)){tab_to_print}
   acf_to_lag_p <- acf(lin_sa,lag.max = p,plot=FALSE)
   acf_lag_4 <- acf_to_lag_p$acf[p+1,1,1]
   
-  tibble(`Lag4 correlation`=acf_lag_4,
+  dplyr::tibble(`Lag4 correlation`=acf_lag_4,
          `Standard error`=1/sqrt(n),
          `p-value`= pnorm(acf_lag_4*sqrt(n)))|>
-    mutate(`p-value`= cell_spec(round(`p-value`,4),
+    dplyr::mutate(`p-value`= cell_spec(round(`p-value`,4),
                                 background=(ifelse(`p-value`<=0.05 ,"#FFCDCD","#DAFFCD")))
            )|>
     kable(digits = 3)
@@ -568,7 +571,7 @@ if(!is.null(tab_to_print)){tab_to_print}
 ```{r}
 #| title: Data being validated
 
-tibble(Date = as.Date(time(nsa)),NSA=nsa,SA=sa) |> 
-  datatable()
+dplyr::tibble(Date = zoo::as.Date(stats::time(nsa)),NSA=nsa,SA=sa) |> 
+  DT::datatable()
 
 ```

@@ -2,6 +2,7 @@
 
 export(adjust_fact_plot)
 export(annual_totals_plot)
+export(cal_effect_plot)
 export(check_for_calendar_vars)
 export(check_identical)
 export(check_negatives)
