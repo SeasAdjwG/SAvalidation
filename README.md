@@ -31,10 +31,16 @@ level1_validation(data_to_check$nsa,data_to_check$sa)
 #> [1] "FAIL: EVIDENCE OF RESIDUAL SEASONALITY OR CALENDAR EFFECTS IN SA SERIES"
 ```
 
-Create a plot from level 2 validation code
+Create a plot from level 2 validation code for example the NSA against
+the SA
 
 ``` r
 nsa_sa_plot(data_to_check$nsa,data_to_check$sa)
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+<!-- Or the derived adjustment factor plot -->
+<!-- ```{r } -->
+<!-- adjust_fact_plot(data_to_check$nsa,data_to_check$sa) -->
+<!-- ``` -->

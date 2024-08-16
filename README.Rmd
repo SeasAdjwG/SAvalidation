@@ -34,23 +34,20 @@ This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
 library(SAvalidation)
-## basic example code
+
+data("data_to_check")
 
 level1_validation(data_to_check$nsa,data_to_check$sa)
 ```
 
 
-Create a plot from level 2 validation code
-```{r cars}
-summary(cars)
+Create a plot from level 2 validation code for example the NSA against the SA
+
+```{r }
+nsa_sa_plot(data_to_check$nsa,data_to_check$sa)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+<!-- Or the derived adjustment factor plot -->
+<!-- ```{r } -->
+<!-- adjust_fact_plot(data_to_check$nsa,data_to_check$sa) -->
+<!-- ``` -->
