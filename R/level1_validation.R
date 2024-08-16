@@ -172,7 +172,7 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
         has_overadjustment <- check_over_adjustment(sa_mod)
 
 
-        annual_totals_message <- ifelse(max_diff_relative_to_rmse > 0.05,
+        annual_totals_message <- ifelse(max_diff_relative_to_rmse > 0.01,
                                         "WARNING: ANNUAL TOTALS CHECK FAILED",
                                         "ANNUAL TOTALS CHECK PASSED")
         negatives_message <- ifelse(has_negatives,
