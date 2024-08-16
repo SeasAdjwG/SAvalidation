@@ -243,7 +243,7 @@ level2_validation <- function(nsa,sa,series_name,
 
   dashboard_to_create <- file.path(output_directory,paste0(series_name,".qmd"))
 
-  file.copy(dashboard_template_to_copy,dashboard_to_create)
+  file.copy(dashboard_template_to_copy,dashboard_to_create,overwrite = TRUE)
 
 
   check_nsa_sa_ts(nsa,sa)
