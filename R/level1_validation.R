@@ -15,6 +15,7 @@ NULL
 #' @export
 #'
 #' @examples
+#' data(data_to_check)
 #' nsa <- data_to_check$nsa
 #' jd_mod <- RJDemetra::x13(nsa)
 #' get_combined_seasonality_test(jd_mod)
@@ -31,6 +32,7 @@ get_combined_seasonality_test <- function(sa_mod){
 #' @export
 #'
 #' @examples
+#' data(data_to_check)
 #' nsa <- data_to_check$nsa
 #' jd_mod <- RJDemetra::x13(nsa)
 #' check_for_calendar_vars(jd_mod)
@@ -53,6 +55,7 @@ check_for_calendar_vars <- function(sa_mod){
 #' @export
 #'
 #' @examples
+#' data(data_to_check)
 #' check_identical(data_to_check$nsa,data_to_check$sa)
 check_identical <- function(nsa,sa){
   check <- all(nsa==sa)
@@ -69,6 +72,7 @@ check_identical <- function(nsa,sa){
 #' @export
 #'
 #' @examples
+#' data(data_to_check)
 #' check_negatives(data_to_check$nsa)
 check_negatives <- function(series_to_check){
   result <- any(series_to_check < 0)
@@ -88,6 +92,7 @@ check_negatives <- function(series_to_check){
 #'Tests null hypothesis that acf at lag 4 is greater or equal to zero
 #'
 #' @examples
+#' data(data_to_check)
 #' sa <- data_to_check$sa
 #' jd_mod <- RJDemetra::x13(sa,userdefined="preprocessing.model.y_lin")
 #' check_over_adjustment(jd_mod)
@@ -117,6 +122,7 @@ check_over_adjustment <- function(sa_mod,pval=0.05){
 #' @export
 #'
 #' @examples
+#' data(data_to_check)
 #' level1_validation(data_to_check$nsa,data_to_check$sa)
 level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RSA1",default_spec_sa="RSA2c"){
 
