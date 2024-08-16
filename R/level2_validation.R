@@ -1,4 +1,14 @@
-# Check nsa and sa are univariate time series of same period
+#' Check nsa and sa are univariate time series of same period
+#'
+#' @param nsa ts object
+#' @param sa  ts object
+#'
+#' @return stops if problem with nsa and sa time series
+#' @export
+#'
+#' @examples
+#' data(data_to_check)
+#' check_nsa_sa_ts(data_to_check$nsa,data_to_check$sa)
 check_nsa_sa_ts <- function(nsa,sa){
   if(!stats::is.ts(nsa)){stop("nsa is not a time series object")}
   if(!stats::is.ts(sa)){stop("sa is not a time series object")}
@@ -7,30 +17,56 @@ check_nsa_sa_ts <- function(nsa,sa){
   if(stats::frequency(nsa)!=stats::frequency(sa)){stop("frequency of nsa and sa series are different")}
   if(!all(stats::start(nsa)==stats::start(sa))){stop("start periods of nsa and sa are different")}
   if(!all(stats::end(nsa)==stats::end(sa))){stop("end periods of nsa and sa are different")}
-  if(!any(is.na(nsa))){stop("missing data in nsa time series")}
-  if(!any(is.na(sa))){stop("missing data in sa time series")}
+  if(any(is.na(nsa))){stop("missing data in nsa time series")}
+  if(any(is.na(sa))){stop("missing data in sa time series")}
 }
 
 
 
-#Plot nsa and sa
 
+#' Plot nsa and sa
+#'
+#' @param nsa ts object (usually unadjusted time series)
+#' @param sa  ts object (usually seasonally adjusted time series)
+#' @param title Optional title
+#'
+#' @return ggplot of nsa and sa series
+#' @export
+#'
+#' @examples
+#' data(data_to_check)
+#' nsa_sa_plot(data_to_check$nsa,data_to_check$sa)
 nsa_sa_plot <- function(nsa,sa,title=NULL){
   check_nsa_sa_ts(nsa,sa)
 
-  p <- dplyr::tibble(Date = as.Date(time(sa)),NSA=nsa,SA=sa) |>
+  p <- dplyr::tibble(Date = zoo::as.Date(time(sa)),NSA=nsa,SA=sa) |>
     tidyr::pivot_longer(cols=c("NSA","SA"),
                  names_to = "Series",
                  values_to = "Value") |>
-    ggplot2::ggplot(aes(x=Date,y=Value,color=Series))+
+    ggplot2::ggplot(ggplot2::aes(x=Date,y=Value,color=Series))+
     ggplot2::geom_line() +
     ggplot2::ggtitle(title)
   return(p)
 }
 
 
-#Plot adjustment factor
 
+#' Plot adjustment factor
+#'
+#' @param nsa ts object (usually unadjusted time series)
+#' @param sa ts object (usually seasonally adjusted time series)
+#' @param title optional title
+#' @param easter_lag integer defining the number of days before Easter Sunday to create the Easter window
+#' @param julian_easter logical, should EAster be a Julian Easter, default FALSE
+#' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
+#' @param default_spec_nsa name of a default JDemetra+ specification to use for determining decomposition mode (default is  "RSA2c")
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' load(data_to_check)
+#' adjust_fact_plot(data_to_check$nsa,data_to_check$sa)
 adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=FALSE, default_type = "X13", default_spec_nsa="RSA2c"){
 
   check_nsa_sa_ts(nsa,sa)
@@ -44,26 +80,23 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
     decomp_mode <- nsa_mod$decomposition$mode
   }
 
-  start_yr <- start(nsa)[1]
-  end_yr <- end(nsa)[1]
+  start_yr <- stats::start(nsa)[1]
+  end_yr <- stats::end(nsa)[1]
 
-  #  easter_info_q <- dplyr::tibble(easter_date=as.Date(rjd3toolkit::easter_dates(start_yr,end_yr))) |>
-  #    mutate(quarter=quarter(easter_date),
-  #           year = year(easter_date))
 
   easter_window_dates <- rjd3toolkit::easter_dates(start_yr,end_yr,julian = julian_easter) |>
-    as.Date()|>
+    zoo::as.Date()|>
     lapply(function(x){x-c(1:easter_lag)}) |>
     unlist() |>
-    as.Date()
+    zoo::as.Date()
 
   easter_info_q <- dplyr::tibble(easter_date = easter_window_dates) |>
-    dplyr::mutate(quarter=quarter(easter_date),
-           year = year(easter_date)) |>
+    dplyr::mutate(quarter=lubridate::quarter(easter_date),
+           year = lubridate::year(easter_date)) |>
     dplyr::group_by(year,quarter) |>
     dplyr::summarise(Easter_w=length(easter_date))
 
-  p <- dplyr::tibble(Date = as.Date(time(sa)),NSA=nsa,SA=sa,decomp=decomp_mode) |>
+  p <- dplyr::tibble(Date = zoo::as.Date(time(sa)),NSA=nsa,SA=sa,decomp=decomp_mode) |>
     dplyr::mutate(Adjustment= ifelse(decomp=="Multiplicative",NSA/SA,NSA-SA),
            hline = ifelse(decomp=="Multiplicative",1,0),
            quarter = lubridate::quarter(Date),
@@ -74,9 +107,9 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
                  values_to = "Value") |>
     dplyr::left_join(easter_info_q)|>
     dplyr::mutate(`Easter window days in quarter` = as.factor(ifelse(is.na(Easter_w),0,Easter_w))) |>
-    ggplot2::ggplot(aes(x=Date,y=Adjustment,color = `Easter window days in quarter`))+
+    ggplot2::ggplot(ggplot2::aes(x=Date,y=Adjustment,color = `Easter window days in quarter`))+
       ggplot2::geom_point()+
-      ggplot2::geom_line(aes(y=hline),color="black",linetype=2) +
+      ggplot2::geom_line(ggplot2::aes(y=hline),color="black",linetype=2) +
       ggplot2::facet_grid(.~Quarter)+
       ggplot2::ggtitle(paste("Derived adjustment factors for series", title))
 
@@ -85,12 +118,24 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
 }
 
 
+#' Plot of relative difference of annual totals
+#'
+#' @param nsa ts object (usually unadjusted time series)
+#' @param sa ts object (usually seasonally adjusted time series)
+#' @param title optional title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' load(data_to_check)
+#' annual_totals_plot(data_to_check$nsa,data_to_check$sa)
 annual_totals_plot <- function(nsa,sa, title = NULL){
 
   check_nsa_sa_ts(nsa,sa)
 
-  mid_yr <- mean(c(start(nsa)[1],end(nsa)[1]))
-  p <- dplyr::tibble(Date = as.Date(time(sa)),NSA=nsa,SA=sa) |>
+  mid_yr <- mean(c(stats::start(nsa)[1],stats::end(nsa)[1]))
+  p <- dplyr::tibble(Date = zoo::as.Date(time(sa)),NSA=nsa,SA=sa) |>
     dplyr::mutate(year = lubridate::year(Date),
            quarter = lubridate::quarter(Date))|>
     dplyr::group_by(year) |>
@@ -99,7 +144,7 @@ annual_totals_plot <- function(nsa,sa, title = NULL){
               full_yr_check = sum(quarter)) |>
     dplyr::filter(full_yr_check == 10)|>
     dplyr::mutate(`Relative difference` = abs(nsa_total-sa_total)/((4/sqrt(length(nsa)))*sqrt(sum(nsa^2))) ) |>
-    ggplot2::ggplot(aes(x=year,y=`Relative difference`))+
+    ggplot2::ggplot(ggplot2::aes(x=year,y=`Relative difference`))+
       ggplot2::geom_hline(yintercept = c(0.05),linetype=1)+
       ggplot2::geom_hline(yintercept = c(0.01),linetype=2)+
       ggplot2::geom_label(x=mid_yr,y=0.01,label = "Level 1 warning threshold")+
@@ -126,7 +171,7 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 
 
 
-  p <- dplyr::tibble(Date = as.Date(time(sa)),
+  p <- dplyr::tibble(Date = zoo::as.Date(stats::time(sa)),
               NSA=nsa,
               SA=sa,
               decomp=decomp_mode,
@@ -137,41 +182,60 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
     tidyr::pivot_longer(cols=c("Adjustment","Calendar effect"),
                  names_to = "Series",
                  values_to = "Value") |>
-    ggplot2::ggplot(aes(x=Date,y=Value,color = Series))+
+    ggplot2::ggplot(ggplot2::aes(x=Date,y=Value,color = Series))+
     ggplot2::geom_point()+
-    ggplot2::geom_line(aes(y=hline),color="black",linetype=2) +
+    ggplot2::geom_line(ggplot2::aes(y=hline),color="black",linetype=2) +
     ggplot2::ggtitle(paste("Derived adjustment factors and residual calendar effect", title))
 
   return(p)
 
 }
 
-get_series_to_check <- function(series_name,NSA_df,SA_df){
-  start_date <- as.Date(NSA_df[1,1])
-  start_yr <- lubridate::year(start_date)
-  start_qr <- lubridate::quarter(start_date)
+# get_series_to_check <- function(series_name,NSA_df,SA_df){
+#   start_date <- zoo::as.Date(NSA_df[1,1])
+#   start_yr <- lubridate::year(start_date)
+#   start_qr <- lubridate::quarter(start_date)
+#
+#   nsa <- stats::ts(NSA_df[,i],start=c(start_yr,start_qr),frequency = 4)
+#   sa <- stats::ts(SA_df[,i],start=c(start_yr,start_qr),frequency = 4)
+#   return(list(name=series_name,
+#               nsa=nsa,
+#               sa=sa))
+# }
 
-  nsa <- stats::ts(NSA_df[,i],start=c(start_yr,start_qr),frequency = 4)
-  sa <- stats::ts(SA_df[,i],start=c(start_yr,start_qr),frequency = 4)
-  return(list(name=series_name,
-              nsa=nsa,
-              sa=sa))
-}
 
 
-
-level2_validation <- function(nsa,sa,series_name,code_dir,dashboard_template,
+#' Title
+#'
+#' @param nsa ts object (usually unadjusted time series)
+#' @param sa ts object (usually seasonally adjusted time series)
+#' @param series_name a name for the time series to be analysed
+#' @param dashboard_template full file path and name of dashboard template to use
+#' @param start_date Character defining start date in format "YYYY-MM-DD"
+#' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
+#' @param default_spec_nsa name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")
+#' @param default_spec_sa name of a default JDemetra+ specification to use for tests on SA series (default is  "RSA2c")
+#'
+#' @return
+#' @export
+#'
+#' @examples
+level2_validation <- function(nsa,sa,series_name,dashboard_template,
                               start_date="1999-01-01",
                               default_type = "X13",
                               default_spec_nsa="RSA2c",
                               default_spec_sa="RSA2c"){
+
+  if(!file.exists(dashboard_template)){stop("please provide a validation dashboard template")}
+
+
   check_nsa_sa_ts(nsa,sa)
 
   ts_start <- stats::start(nsa)
   ts_freq <- stats::frequency(nsa)
   quarto::quarto_render(dashboard_template,
+                        output_file = series_name,
                 execute_params =  list(
-                  code_dir = code_dir,
                   nsa = nsa,
                   sa = sa,
                   name = series_name,
