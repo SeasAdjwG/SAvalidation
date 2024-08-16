@@ -61,7 +61,7 @@ nsa_sa_plot <- function(nsa,sa,title=NULL){
 #' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
 #' @param default_spec_nsa name of a default JDemetra+ specification to use for determining decomposition mode (default is  "RSA2c")
 #'
-#' @return
+#' @return A plot of derived adjustment factors
 #' @export
 #'
 #' @examples
@@ -124,7 +124,7 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
 #' @param sa ts object (usually seasonally adjusted time series)
 #' @param title optional title
 #'
-#' @return
+#' @return A plot of the relative difference of annual totals between nsa and sa
 #' @export
 #'
 #' @examples
@@ -210,31 +210,48 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 #' @param nsa ts object (usually unadjusted time series)
 #' @param sa ts object (usually seasonally adjusted time series)
 #' @param series_name a name for the time series to be analysed
-#' @param dashboard_template full file path and name of dashboard template to use
+#' @param output_directory optional output directory for dashboard (default uses getwd())
+#' @param dashboard_template name of dashboard template to use
 #' @param start_date Character defining start date in format "YYYY-MM-DD"
 #' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
 #' @param default_spec_nsa name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")
 #' @param default_spec_sa name of a default JDemetra+ specification to use for tests on SA series (default is  "RSA2c")
 #'
-#' @return
+#' @return creates an html dashboard with series name in given output directory
 #' @export
 #'
 #' @examples
-level2_validation <- function(nsa,sa,series_name,dashboard_template,
+#' load(data_to_check)
+#' level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
+level2_validation <- function(nsa,sa,series_name,
+                              output_directory = NULL,
+                              dashboard_template="skeleton.qmd",
                               start_date="1999-01-01",
                               default_type = "X13",
                               default_spec_nsa="RSA2c",
                               default_spec_sa="RSA2c"){
 
-  if(!file.exists(dashboard_template)){stop("please provide a validation dashboard template")}
+  if(is.null(output_directory)){
+    output_directory <- getwd()
+  }
+  if(!dir.exists(output_directory)){
+    dir.create(output_directory,recursive = TRUE)
+  }
+
+  dashboard_template_to_copy <- file.path(system.file("rmarkdown/templates/level2_report/skeleton",
+                                                      package="SAvalidation"),dahsboard_template)
+  if(!file.exists(dashboard_template)){stop("no dashboard template found of that name in the system files")}
+
+  dashboard_to_create <- file.path(output_directory,paste0(series_name,".qmd"))
+
+  file.copy(dashboard_template_to_copy,dashboard_to_create)
 
 
   check_nsa_sa_ts(nsa,sa)
 
   ts_start <- stats::start(nsa)
   ts_freq <- stats::frequency(nsa)
-  quarto::quarto_render(dashboard_template,
-                        output_file = series_name,
+  quarto::quarto_render(dashboard_to_create,
                 execute_params =  list(
                   nsa = nsa,
                   sa = sa,
