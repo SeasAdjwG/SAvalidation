@@ -43,6 +43,5 @@ Title
 }
 \examples{
 load(data_to_check)
-template_file <- sys
 level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
 }
