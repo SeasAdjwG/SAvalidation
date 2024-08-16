@@ -230,7 +230,6 @@ level2_validation <- function(nsa,sa,series_name,
                               default_type = "X13",
                               default_spec_nsa="RSA2c",
                               default_spec_sa="RSA2c"){
-
   if(is.null(output_directory)){
     output_directory <- getwd()
   }
@@ -239,7 +238,7 @@ level2_validation <- function(nsa,sa,series_name,
   }
 
   dashboard_template_to_copy <- file.path(system.file("rmarkdown/templates/level2_report/skeleton",
-                                                      package="SAvalidation"),dahsboard_template)
+                                                      package="SAvalidation"),dashboard_template)
   if(!file.exists(dashboard_template_to_copy)){stop("no dashboard template found of that name in the system files")}
 
   dashboard_to_create <- file.path(output_directory,paste0(series_name,".qmd"))

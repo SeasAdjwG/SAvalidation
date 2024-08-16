@@ -34,7 +34,6 @@ series_name <- params$name
 
 
 if(!default_type%in%c("X13","TS")){stop("default_type must be `X13` or `TS`")}
-if(is.na(code_dir)){stop("please specify code_dir")}
 if(any(is.na(nsa))){stop("nsa series has missing data")}
 if(any(is.na(sa))){stop("sa series is missing")}
 
