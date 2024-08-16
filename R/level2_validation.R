@@ -240,7 +240,7 @@ level2_validation <- function(nsa,sa,series_name,
 
   dashboard_template_to_copy <- file.path(system.file("rmarkdown/templates/level2_report/skeleton",
                                                       package="SAvalidation"),dahsboard_template)
-  if(!file.exists(dashboard_template)){stop("no dashboard template found of that name in the system files")}
+  if(!file.exists(dashboard_template_to_copy)){stop("no dashboard template found of that name in the system files")}
 
   dashboard_to_create <- file.path(output_directory,paste0(series_name,".qmd"))
 
