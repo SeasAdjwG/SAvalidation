@@ -1,0 +1,575 @@
+---
+title: "Level 2 validation"
+author: "GOPA SA experts"
+date: today
+format: 
+  dashboard:
+    embed-resources: true
+params:
+  nsa: "NA"
+  sa: "NA"
+  name: "NA"
+  start_date: "1999-01-01"
+  ts_start: "NA"
+  ts_freq: "NA"
+  default_type: "X13"
+  default_spec_nsa: "RSA1"
+  default_spec_sa: "RSA2c"
+---
+
+```{r}
+#| message: false
+#| warning: false
+
+library(knitr)
+library(kableExtra)
+library(SAvalidation)
+
+default_type <- params$default_type
+default_spec_nsa <- params$default_spec_nsa
+default_spec_sa <- params$default_spec_sa
+nsa <- stats::ts(params$nsa,start=params$ts_start,frequency = params$ts_freq)
+sa <- stats::ts(params$sa,start=params$ts_start,frequency = params$ts_freq)
+series_name <- params$name
+
+
+if(!default_type%in%c("X13","TS")){stop("default_type must be `X13` or `TS`")}
+if(is.na(code_dir)){stop("please specify code_dir")}
+if(any(is.na(nsa))){stop("nsa series has missing data")}
+if(any(is.na(sa))){stop("sa series is missing")}
+
+if(!is.ts(nsa)){stop(paste("nsa is not a time series it has class",class(nsa),nsa))}
+
+start_yr <- as.numeric(substr(params$start_date,1,4))
+
+l1_out <- capture.output(level1_validation(nsa,sa))
+
+start_5yr <- end(nsa)-5
+
+if(default_type=="TS"){
+    nsa_mod <- RJDemetra::tramoseats(nsa,
+                                     spec = default_spec_nsa,
+                                     userdefined = user_defined_variables("TRAMO-SEATS"))
+    sa_mod <- RJDemetra::tramoseats(sa,
+                                    spec = default_spec_sa,
+                                    userdefined = user_defined_variables("TRAMO-SEATS"))
+    nsa_mod5 <- RJDemetra::tramoseats(window(nsa,start=start_5yr),
+                                     spec = default_spec_nsa,
+                                     userdefined = user_defined_variables("TRAMO-SEATS"))
+    sa_mod5 <- RJDemetra::tramoseats(window(sa,start=start_5yr),
+                                    spec = default_spec_sa,
+                                    userdefined = user_defined_variables("TRAMO-SEATS"))
+  }
+if(default_type=="X13"){
+    nsa_mod <- RJDemetra::x13(nsa,
+                              spec = default_spec_nsa,
+                              userdefined = user_defined_variables("X13-ARIMA"))
+    sa_mod <- RJDemetra::x13(sa,
+                             spec = default_spec_sa,
+                             userdefined = user_defined_variables("X13-ARIMA"))
+    nsa_mod5 <- RJDemetra::x13(window(nsa,start=start_5yr),
+                                     spec = default_spec_nsa,
+                                     userdefined = user_defined_variables("X13-ARIMA"))
+    sa_mod5 <- RJDemetra::x13(window(sa,start=start_5yr),
+                                    spec = default_spec_sa,
+                                    userdefined = user_defined_variables("X13-ARIMA"))
+
+  }
+```
+
+#  {.sidebar width="375px"}
+
+**This dashboard displays validation results for:**
+
+|                        |                                   |
+|------------------------|-----------------------------------|
+| **Dataset**            | National Accounts Main Aggregates |
+| **Series**             | `{r} params$name`          |
+| **First time period**  | `{r} params$start_date`           |
+
+------------------------------------------------------------------------
+
+**Level 1 validation results**
+
+```{r}
+
+if(substr(l1_out[1],1,1)!="P"){
+  kable(l1_out,col.names = NULL) |>
+    column_spec(1,background = "#FFCDCD")
+}else{
+  if(length(grep("WARNING",l1_out))!=0){
+    kable(l1_out,col.names = NULL) |>
+      column_spec(1,background = "#FFECCD")
+  }else{
+    kable(l1_out,col.names = NULL) |>
+      column_spec(1,background = "#DAFFCD")
+  }
+}
+```
+
+------------------------------------------------------------------------
+
+
+
+# Summary
+
+## Row
+
+```{r}
+#| title: NSA and SA
+
+nsa_sa_plot(nsa,sa,title = params$name)
+```
+
+### Column
+
+```{r}
+#| title: Adjustment factor
+
+adjust_fact_plot(nsa,sa,title = params$name)
+```
+
+
+## Row {height="40%"}
+
+```{r}
+#| title: Test for seasonality in NSA
+
+
+comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
+
+if(comb_test_res=="None"){
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+}else{
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+}
+
+message_to_print
+
+```
+
+```{r}
+#| title: Test for residual seasonality in SA
+
+comb_test_res <- sa_mod$diagnostics$combined_test$combined_seasonality_test
+
+if(comb_test_res=="None"){
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+}else{
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+}
+
+message_to_print
+```
+
+```{r}
+#| title: Test for residual calendar in SA
+
+
+if(check_for_calendar_vars(sa_mod)){
+  message_to_print <- kable("Evidence of residual calendar effects in SA series",
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+  tab_to_print <- sa_mod$regarima$regression.coefficients |> kable(digits = 3)
+  
+  cal_effect <- sa_mod$user_defined$preprocessing.model.cal
+
+}else{
+  message_to_print <- kable("No evidence of residual calendar effects in SA series",
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+  tab_to_print <- sa_mod$regarima$regression.coefficients |> kable(digits = 3)
+}
+
+message_to_print
+
+tab_to_print
+
+
+```
+
+
+# Plots
+
+
+::: {.panel-tabset}
+
+## NSA and SA
+
+
+```{r}
+#| label: fig-nsa-sa
+#| fig-cap: "NSA and SA series"
+
+nsa_sa_plot(nsa,sa,title = params$name)
+```
+
+Plot of the unadjusted (NSA) and seasonally adjusted (SA) series.
+
+## Adjustment factor
+
+
+```{r}
+#| label: fig-adjustment
+#| fig-cap: "Derived adjustment factors"
+
+adjust_fact_plot(nsa,sa,title = params$name)
+```
+
+Plot of the derived adjustment factor. Note that if these are fluctuations around 1 this is because an automatic test for transformation on the NSA series has concluded that the series is likely to have multiplicative decomposition, while if they are fluctuations around 0 the test concluded the series has an additive decomposition.
+
+
+## Annual totals
+
+```{r}
+#| label: fig-annual-totals
+#| fig-cap: "Relative difference of annual totals"
+
+annual_totals_plot(nsa,sa,title = params$name)
+```
+
+## NSA and SA quarterly growths
+
+
+```{r}
+#| label: fig-nsa-sa-qgr
+#| fig-cap: "NSA and SA series quarterly change (percent)"
+
+nsa_qgr <- diff(nsa)/nsa
+sa_qgr <- diff(sa)/sa
+
+nsa_sa_plot(nsa_qgr,sa_qgr,title = params$name)
+```
+
+## NSA and SA annual growths
+
+
+```{r}
+#| label: fig-nsa-sa-agr
+#| fig-cap: "NSA and SA series annual change (percent)"
+
+p <- frequency(nsa)
+nsa_agr <- diff(nsa,p)/nsa
+sa_agr <- diff(sa,p)/sa
+
+nsa_sa_plot(nsa_agr,sa_agr,title = params$name)
+```
+
+
+Plot of the unadjusted (NSA) and seasonally adjusted (SA) series.
+
+
+:::
+
+# Seasonal and calendar effects
+
+## Row
+
+### Column
+
+
+
+
+```{r}
+#| title: Seasonality tests on full NSA series
+
+comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
+
+if(comb_test_res=="None"){
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+}else{
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+}
+
+message_to_print
+
+tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+       `Test statistic` = c(nsa_mod$user_defined$`diagnostics.seas-lin-f`[1],
+                            nsa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
+                            nsa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
+                            nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[1],
+                            nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[1]),
+       `P-value` = c(nsa_mod$user_defined$`diagnostics.seas-lin-f`[2],
+                     nsa_mod$user_defined$`diagnostics.seas-lin-qs`[2],
+                     nsa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
+                     nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
+                     nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+  mutate(`P-value` = cell_spec(round(`P-value`,3),
+                               background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
+  kable(digits = 3)
+```
+
+
+```{r}
+#| title: Seasonality tests on NSA series - last 5 years
+
+            
+comb_test_res <- nsa_mod5$diagnostics$combined_test$combined_seasonality_test
+
+if(comb_test_res=="None"){
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+}else{
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+}
+
+message_to_print
+
+
+tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+       `Test statistic` = c(nsa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
+                            nsa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
+                            nsa_mod5$user_defined$`diagnostics.seas-lin-kw`[1],
+                            nsa_mod5$user_defined$`diagnostics.seas-lin-friedman`[1],
+                            nsa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[1]),
+       `P-value` = c(nsa_mod5$user_defined$`diagnostics.seas-lin-f`[2],
+                     nsa_mod5$user_defined$`diagnostics.seas-lin-qs`[2],
+                     nsa_mod5$user_defined$`diagnostics.seas-lin-kw`[2],
+                     nsa_mod5$user_defined$`diagnostics.seas-lin-friedman`[2],
+                     nsa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+  mutate(`P-value` = cell_spec(round(`P-value`,3),
+                               background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
+  kable(digits = 3)
+
+```
+
+### Column
+
+```{r}
+#| title: Seasonality tests on SA series
+
+comb_test_res <- sa_mod$diagnostics$combined_test$combined_seasonality_test
+
+if(comb_test_res=="None"){
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+}else{
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+}
+
+message_to_print
+
+
+tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+       `Test statistic` = c(sa_mod$user_defined$`diagnostics.seas-lin-f`[1],
+                            sa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
+                            sa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
+                            sa_mod$user_defined$`diagnostics.seas-lin-friedman`[1],
+                            sa_mod$user_defined$`diagnostics.seas-lin-periodogram`[1]),
+       `P-value` = c(sa_mod$user_defined$`diagnostics.seas-lin-f`[2],
+                     sa_mod$user_defined$`diagnostics.seas-lin-qs`[2],
+                     sa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
+                     sa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
+                     sa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+  mutate(`P-value` = cell_spec(round(`P-value`,3),
+                               background = ifelse(`P-value`<=0.05,"#FFCDCD","#DAFFCD")) ) |>
+  kable(digits = 3)
+```
+
+
+```{r}
+#| title: Seasonality tests on SA series - last 5 years
+
+comb_test_res <- sa_mod5$diagnostics$combined_test$combined_seasonality_test
+
+if(comb_test_res=="None"){
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+}else{
+  message_to_print <- kable(cbind("Combined test:",
+                                  comb_test_res),
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+}
+
+message_to_print
+
+tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
+       `Test statistic` = c(sa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
+                            sa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
+                            sa_mod5$user_defined$`diagnostics.seas-lin-kw`[1],
+                            sa_mod5$user_defined$`diagnostics.seas-lin-friedman`[1],
+                            sa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[1]),
+       `P-value` = c(sa_mod5$user_defined$`diagnostics.seas-lin-f`[2],
+                     sa_mod5$user_defined$`diagnostics.seas-lin-qs`[2],
+                     sa_mod5$user_defined$`diagnostics.seas-lin-kw`[2],
+                     sa_mod5$user_defined$`diagnostics.seas-lin-friedman`[2],
+                     sa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+  mutate(`P-value` = cell_spec(round(`P-value`,3),
+                               background = ifelse(`P-value`<=0.05,"#FFCDCD","#DAFFCD")) ) |>
+  kable(digits = 3)
+
+```
+
+### Column
+
+```{r}
+#| title: Test for residual calendar in SA
+
+if(check_for_calendar_vars(sa_mod)){
+  message_to_print <- kable("Evidence of residual calendar effects in SA series",
+                            col.names = NULL) |>
+               row_spec(1,background = "#FFCDCD")
+  tab_to_print <- sa_mod$regarima$regression.coefficients |> kable(digits = 3)
+  
+  cal_effect <- sa_mod$user_defined$preprocessing.model.cal
+  chart_to_print <- cal_effect_plot(nsa,sa,sa_mod)
+  
+}else{
+  message_to_print <- kable("No evidence of residual calendar effects in SA series",
+                            col.names = NULL) |>
+               row_spec(1,background = "#DAFFCD")
+  tab_to_print <- sa_mod$regarima$regression.coefficients |> kable(digits = 3)
+  chart_to_print <- NULL
+}
+
+message_to_print
+
+tab_to_print
+
+if(!is.null(chart_to_print)){chart_to_print}
+```
+
+
+# Checks on SA series
+
+
+## Column
+
+```{r}
+#| title: "Annual totals check: top 5 largest absolute relative differences between NSA and SA annual totals"
+
+ annual_totals <- tibble(Date = as.Date(time(sa)),NSA=nsa,SA=sa) |>
+          mutate(year = year(Date),
+                 quarter = quarter(Date))|> 
+          group_by(year) |>
+          summarise(nsa_total = sum(NSA),
+                    sa_total = sum(SA),
+                    full_yr_check = sum(quarter)) |>
+          filter(full_yr_check == 10)|>
+          mutate(abs_rel_diff =  abs(nsa_total-sa_total)/((4/sqrt(length(nsa)))*sqrt(sum(nsa^2)))) |>
+  select(year,nsa_total,sa_total,abs_rel_diff) |>
+  arrange(-abs_rel_diff) |>
+  mutate(`Absolute relative difference`=cell_spec(round(abs_rel_diff,3),background = ifelse(abs_rel_diff<=0.01 ,"#DAFFCD","#FFCDCD")))
+
+  
+annual_totals[1:5,] |> 
+  rename(Year=year,
+         `NSA total` = nsa_total,
+         `SA total` = sa_total
+         ) |>
+  select(-abs_rel_diff)|>
+  kable(digits = 3)
+```
+
+
+```{r}
+#| title: Tests for randomness in the diffence of NSA and SA annual totals
+
+
+nsa_annual <- aggregate.ts(nsa,nfrequency = 1)
+sa_annual <- aggregate.ts(sa,nfrequency = 1)
+
+annual_totals_diff <- nsa_annual-sa_annual
+
+runstest <- rjd3toolkit::testofruns(annual_totals_diff)
+updowntest <- rjd3toolkit::testofupdownruns(annual_totals_diff)
+
+
+
+tibble(Test = c("Runs test","Up down test"), 
+       Value = c(runstest$value,updowntest$value),
+       `p-value` = c(runstest$pvalue,updowntest$pvalue))|>
+  mutate(`p-value`=cell_spec(round(`p-value`,3),
+                             background=(ifelse(`p-value`<=0.05 ,"#FFCDCD","#DAFFCD")))
+         )|>
+  kable(digits = 3)
+
+```
+
+
+## Column
+
+```{r}
+#| title: Check for negative values in SA series
+
+if(check_negatives(sa)){
+  message_to_print <- kable("SA series has negative values",col.names = NULL) |> row_spec(1,background = "#FFCDCD")
+  tab_to_print <- tibble(Date=as.Date(time(sa)),
+         SA=sa)|>
+         filter(sa<0)|>
+         mutate(SA = cell_spec(SA,background = "#FFCDCD"))
+    kable(digits = 3)
+}else{
+    message_to_print <- 
+    message_to_print <- kable("No negative values in the SA series",col.names = NULL) |> row_spec(1,background = "#DAFFCD")
+    tab_to_print <- NULL 
+}
+
+message_to_print
+
+if(!is.null(tab_to_print)){tab_to_print}
+
+```
+
+
+```{r}
+#| title: Overadjustment check
+
+  lin_sa <- sa_mod$user_defined$`preprocessing.model.y_lin` |>
+              diff() 
+  n <- length(lin_sa)
+  p <- frequency(lin_sa)
+  
+  acf_to_lag_p <- acf(lin_sa,lag.max = p,plot=FALSE)
+  acf_lag_4 <- acf_to_lag_p$acf[p+1,1,1]
+  
+  tibble(`Lag4 correlation`=acf_lag_4,
+         `Standard error`=1/sqrt(n),
+         `p-value`= pnorm(acf_lag_4*sqrt(n)))|>
+    mutate(`p-value`= cell_spec(round(`p-value`,4),
+                                background=(ifelse(`p-value`<=0.05 ,"#FFCDCD","#DAFFCD")))
+           )|>
+    kable(digits = 3)
+
+```
+
+# Data
+
+```{r}
+#| title: Data being validated
+
+tibble(Date = as.Date(time(nsa)),NSA=nsa,SA=sa) |> 
+  datatable()
+
+```
