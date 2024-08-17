@@ -32,22 +32,26 @@ You can install the development version of SAvalidation like so:
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r example1}
 library(SAvalidation)
-
-data("data_to_check")
 
 level1_validation(data_to_check$nsa,data_to_check$sa)
 ```
+A level 2 validation report can be created with `level2_validation()` which returns an html dashboard either in current working directory or a user specified directory
 
+```{r,eval=FALSE}
 
-Create a plot from level 2 validation code for example the NSA against the SA
+level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
+
+```
+
+Can also create plots from level 2 validation code for example the NSA against the SA
 
 ```{r }
 nsa_sa_plot(data_to_check$nsa,data_to_check$sa)
 ```
 
-<!-- Or the derived adjustment factor plot -->
-<!-- ```{r } -->
-<!-- adjust_fact_plot(data_to_check$nsa,data_to_check$sa) -->
-<!-- ``` -->
+Or the derived adjustment factor plot
+```{r }
+adjust_fact_plot(data_to_check$nsa,data_to_check$sa)
+```
