@@ -36,6 +36,6 @@ A plot of derived adjustment factors
 Plot adjustment factor
 }
 \examples{
-load(data_to_check)
+data(data_to_check, package = "SAvalidation")
 adjust_fact_plot(data_to_check$nsa,data_to_check$sa)
 }

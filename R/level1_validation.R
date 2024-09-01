@@ -6,7 +6,6 @@
 #' @keywords data
 NULL
 
-
 #' Extract combined test for seasonality on linearised series
 #'
 #' @param sa_mod An SA object from RJDemetra
@@ -14,6 +13,7 @@ NULL
 #' @return A character vector stating the final result of the combined test for seasonality
 #' @export
 #'
+#' @importFrom stats window time
 #' @examples
 #' data(data_to_check)
 #' nsa <- data_to_check$nsa

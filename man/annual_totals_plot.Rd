@@ -20,6 +20,6 @@ A plot of the relative difference of annual totals between nsa and sa
 Plot of relative difference of annual totals
 }
 \examples{
-load(data_to_check)
+data(data_to_check, package = "SAvalidation")
 annual_totals_plot(data_to_check$nsa,data_to_check$sa)
 }

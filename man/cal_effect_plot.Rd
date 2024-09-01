@@ -33,6 +33,8 @@ A plot of calendar effects and derived adjusted effects
 Plot of calendar effects
 }
 \examples{
-test_sa_mod <- RJDemetra::x13(data_to_check$sa,spec="RSA2c", userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
+test_sa_mod <- RJDemetra::x13(data_to_check$sa,
+spec="RSA2c",
+userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
 cal_effect_plot(data_to_check$nsa,data_to_check$sa,test_sa_mod)
 }

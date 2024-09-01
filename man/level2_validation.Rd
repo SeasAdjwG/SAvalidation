@@ -42,6 +42,6 @@ creates an html dashboard with series name in given output directory
 Title
 }
 \examples{
-load(data_to_check)
+data(data_to_check, package = "SAvalidation")
 level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
 }

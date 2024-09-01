@@ -65,7 +65,7 @@ nsa_sa_plot <- function(nsa,sa,title=NULL){
 #' @export
 #'
 #' @examples
-#' load(data_to_check)
+#' data(data_to_check, package = "SAvalidation")
 #' adjust_fact_plot(data_to_check$nsa,data_to_check$sa)
 adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=FALSE, default_type = "X13", default_spec_nsa="RSA2c"){
 
@@ -128,7 +128,7 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
 #' @export
 #'
 #' @examples
-#' load(data_to_check)
+#' data(data_to_check, package = "SAvalidation")
 #' annual_totals_plot(data_to_check$nsa,data_to_check$sa)
 annual_totals_plot <- function(nsa,sa, title = NULL){
 
@@ -169,7 +169,9 @@ annual_totals_plot <- function(nsa,sa, title = NULL){
 #' @export
 #'
 #' @examples
-#' test_sa_mod <- RJDemetra::x13(data_to_check$sa,spec="RSA2c", userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
+#' test_sa_mod <- RJDemetra::x13(data_to_check$sa,
+#' spec="RSA2c",
+#' userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
 #' cal_effect_plot(data_to_check$nsa,data_to_check$sa,test_sa_mod)
 cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", default_spec_nsa="RSA2c"){
 
@@ -236,7 +238,7 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 #' @export
 #'
 #' @examples
-#' load(data_to_check)
+#' data(data_to_check, package = "SAvalidation")
 #' level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
 level2_validation <- function(nsa,sa,series_name,
                               output_directory = NULL,
