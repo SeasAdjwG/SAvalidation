@@ -1,29 +1,35 @@
 Package: SAvalidation
 Title: Validation checks on seasonally adjusted time series
 Version: 0.0.0.9000
-Authors@R: 
-    person("Duncan", "Elliott", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+  person("Duncan", "Elliott", role = c("aut", "cre"),
+         email = "duncan_elliott@yahoo.co.uk"),
+  person("Alain", "Quartier-la-Tente", role = c("ctb"),
+         email = "alain.quartier@yahoo.fr",
+         comment = c(ORCID = "0000-0001-7890-3857"))
+          )
 Description: Functions for running validation checks on a pair of time series, an unadjsuted (NSA) and seasonally adjusted (SA) series.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: EUPL
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 LazyData: true
+SystemRequirements: Java (>= 17)
 Imports: 
     dplyr,
-    DT,
     ggplot2,
     lubridate,
     quarto,
-    rjd3toolkit,
+    rjd3toolkit (>= 3.2.0),
     RJDemetra,
     stats,
     tidyr,
     zoo
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    DT
+Remotes: 
+    github::rjdverse/rjd3toolkit
 Config/testthat/edition: 3
