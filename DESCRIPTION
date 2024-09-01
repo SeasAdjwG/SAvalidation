@@ -29,7 +29,8 @@ Imports:
     zoo
 Suggests: 
     testthat (>= 3.0.0),
-    DT
+    DT,
+    knitr
 Remotes: 
     github::rjdverse/rjd3toolkit
 Config/testthat/edition: 3
