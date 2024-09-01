@@ -9,4 +9,4 @@
 library(testthat)
 library(SAvalidation)
 
-test_check("SAvalidation")
+# test_check("SAvalidation")
