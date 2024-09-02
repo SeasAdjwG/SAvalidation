@@ -30,7 +30,8 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0),
     DT,
-    knitr
+    knitr,
+    kableExtra
 Remotes: 
     github::rjdverse/rjd3toolkit
 Config/testthat/edition: 3
