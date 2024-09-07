@@ -113,65 +113,50 @@ cat(sprintf(
 
 ## Row
 
+::: {.card title="NSA and SA"}
 ```{r}
-#| title: NSA and SA
-
 nsa_sa_plot(nsa,sa,title = params$name)
 ```
+:::
 
 ### Column
 
+::: {.card title="Adjustment factor"}
 ```{r}
-#| title: Adjustment factor
-
 adjust_fact_plot(nsa,sa,title = params$name)
 ```
-
+:::
 
 ## Row {height="40%"}
 
+::: {.card title="Test for seasonality in NSA"}
 ```{r}
-#| title: Test for seasonality in NSA
-
-
+#| output: asis
 comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
 
-if(comb_test_res=="None"){
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#FFCDCD")
-}else{
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#DAFFCD")
-}
-
-message_to_print
-
+cat(sprintf(
+  '<p style="background-color: %s;">Combined test: %s</p>',
+  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  comb_test_res
+  )
+)
 ```
 
-```{r}
-#| title: Test for residual seasonality in SA
+:::
 
+::: {.card title="Test for seasonality in SA"}
+```{r}
+#| output: asis
 comb_test_res <- sa_mod$diagnostics$combined_test$combined_seasonality_test
 
-if(comb_test_res=="None"){
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#DAFFCD")
-}else{
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#FFCDCD")
-}
-
-message_to_print
+cat(sprintf(
+  '<p style="background-color: %s;">Combined test: %s</p>',
+  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  comb_test_res
+  )
+)
 ```
-
+:::
 
 ::: {.card title="Test for residual calendar in SA"}
 ```{r}
@@ -183,7 +168,7 @@ if(check_for_calendar_vars(sa_mod)){
   cal_effect <- sa_mod$user_defined$preprocessing.model.cal
 }else{
   message_to_print <- 
-    '<p style="background-color: ##DAFFCD;">Evidence of residual calendar effects in SA series</p>'
+    '<p style="background-color: #DAFFCD;">No evidence of residual calendar effects in SA series</p>'
 }
 
 cat(message_to_print)
@@ -276,66 +261,56 @@ Plot of the unadjusted (NSA) and seasonally adjusted (SA) series.
 ### Column
 
 
-
+::: {.card title="Seasonality tests on full NSA series"}
 
 ```{r}
-#| title: Seasonality tests on full NSA series
-
+#| output: asis
 comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
 
-if(comb_test_res=="None"){
-  message_to_print <- kableExtra::kbl(cbind("Combined test:",
-                                            comb_test_res),
-                                      col.names = NULL, table.attr = 'data-quarto-disable-processing="true"',escape = FALSE) |>
-    row_spec(1,background = "#FFCDCD")
-}else{
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#DAFFCD")
-}
+cat(sprintf(
+  '<p style="background-color: %s;">Combined test: %s</p>',
+  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  comb_test_res
+  )
+)
+```
 
-message_to_print
-
+```{r}
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
-              `Test statistic` = c(nsa_mod$user_defined$`diagnostics.seas-lin-f`[1],
-                                   nsa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
-                                   nsa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
-                                   nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[1],
-                                   nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[1]),
-              `P-value` = c(nsa_mod$user_defined$`diagnostics.seas-lin-f`[2],
-                            nsa_mod$user_defined$`diagnostics.seas-lin-qs`[2],
-                            nsa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
-                            nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
-                            nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+              `Test statistic` = c(
+                nsa_mod$user_defined$`diagnostics.seas-lin-f`[1],
+                nsa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
+                nsa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
+                nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[1],
+                nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[1]),
+              `P-value` = c(
+                nsa_mod$user_defined$`diagnostics.seas-lin-f`[2],
+                nsa_mod$user_defined$`diagnostics.seas-lin-qs`[2],
+                nsa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
+                nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
+                nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
   dplyr::mutate(`P-value` = cell_spec(sprintf("%.3f", `P-value`),
                                       background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"',escape = FALSE) |> 
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 ```
 
+:::
+::: {.card title="Seasonality tests on NSA series - last 5 years"}
 
 ```{r}
-#| title: Seasonality tests on NSA series - last 5 years
-
-
+#| output: asis
 comb_test_res <- nsa_mod5$diagnostics$combined_test$combined_seasonality_test
 
-if(comb_test_res=="None"){
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#FFCDCD")
-}else{
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#DAFFCD")
-}
+cat(sprintf(
+  '<p style="background-color: %s;">Combined test: %s</p>',
+  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  comb_test_res
+  )
+)
+```
 
-message_to_print
-
-
+```{r}
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
               `Test statistic` = c(nsa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
                                    nsa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
@@ -353,29 +328,26 @@ dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 
 ```
+:::
 
 ### Column
 
-```{r}
-#| title: Seasonality tests on SA series
+::: {.card title="Seasonality tests on SA series"}
 
+```{r}
+#| output: asis
 comb_test_res <- sa_mod$diagnostics$combined_test$combined_seasonality_test
 
-if(comb_test_res=="None"){
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#DAFFCD")
-}else{
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#FFCDCD")
-}
-
-message_to_print
+cat(sprintf(
+  '<p style="background-color: %s;">Combined test: %s</p>',
+  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  comb_test_res
+  )
+)
+```
 
 
+```{r}
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
               `Test statistic` = c(sa_mod$user_defined$`diagnostics.seas-lin-f`[1],
                                    sa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
@@ -393,26 +365,23 @@ dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 ```
 
+:::
 
+::: {.card title="Seasonality tests on SA series - last 5 years"}
 ```{r}
-#| title: Seasonality tests on SA series - last 5 years
-
+#| output: asis
 comb_test_res <- sa_mod5$diagnostics$combined_test$combined_seasonality_test
 
-if(comb_test_res=="None"){
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#DAFFCD")
-}else{
-  message_to_print <- kable(cbind("Combined test:",
-                                  comb_test_res),
-                            col.names = NULL) |>
-    row_spec(1,background = "#FFCDCD")
-}
+cat(sprintf(
+  '<p style="background-color: %s;">Combined test: %s</p>',
+  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  comb_test_res
+  )
+)
+```
 
-message_to_print
 
+```{r}
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
               `Test statistic` = c(sa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
                                    sa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
@@ -430,6 +399,7 @@ dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 
 ```
+:::
 
 ### Column
 
@@ -464,8 +434,9 @@ if(!is.null(chart_to_print)){print(chart_to_print)}
 
 ## Column
 
+::: {.card title="Annual totals check: top 5 largest absolute relative differences between NSA and SA annual totals"}
+
 ```{r}
-#| title: "Annual totals check: top 5 largest absolute relative differences between NSA and SA annual totals"
 
 annual_totals <- dplyr::tibble(Date = zoo::as.Date(stats::time(sa)),NSA=nsa,SA=sa) |>
   dplyr::mutate(year = lubridate::year(Date),
@@ -491,10 +462,10 @@ annual_totals[1:5,] |>
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 ```
 
+:::
+::: {.card title="Tests for randomness in the diffence of NSA and SA annual totals"}
 
 ```{r}
-#| title: Tests for randomness in the diffence of NSA and SA annual totals
-
 
 nsa_annual <- stats::aggregate.ts(nsa,nfrequency = 1)
 sa_annual <- stats::aggregate.ts(sa,nfrequency = 1)
@@ -516,13 +487,13 @@ dplyr::tibble(Test = c("Runs test","Up down test"),
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 
 ```
-
+:::
 
 ## Column
 
-```{r}
-#| title: Check for negative values in SA series
+::: {.card title="Check for negative values in SA series"}
 
+```{r}
 if(check_negatives(sa)){
   message_to_print <- kable("SA series has negative values",col.names = NULL) |> row_spec(1,background = "#FFCDCD")
   tab_to_print <- dplyr::tibble(Date=zoo::as.Date(stats::time(sa)),
@@ -543,9 +514,10 @@ if(!is.null(tab_to_print)){tab_to_print}
 
 ```
 
+:::
+::: {.card title="Overadjustment check"}
 
 ```{r}
-#| title: Overadjustment check
 
 lin_sa <- sa_mod$user_defined$`preprocessing.model.y_lin` |>
   diff() 
@@ -565,13 +537,14 @@ dplyr::tibble(`Lag4 correlation`=acf_lag_4,
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 
 ```
+:::
 
 # Data
 
+::: {.card title="Data being validated"}
 ```{r}
-#| title: Data being validated
-
 dplyr::tibble(Date = zoo::as.Date(stats::time(nsa)),NSA=nsa,SA=sa) |> 
   DT::datatable()
 
 ```
+:::
