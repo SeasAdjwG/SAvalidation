@@ -1,6 +1,6 @@
 Package: SAvalidation
 Title: Validation checks on seasonally adjusted time series
-Version: 0.0.1.1
+Version: 0.0.1.2
 Authors@R: c(
   person("Duncan", "Elliott", role = c("aut", "cre"),
          email = "duncan_elliott@yahoo.co.uk"),
