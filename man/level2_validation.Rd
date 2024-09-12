@@ -13,7 +13,8 @@ level2_validation(
   start_date = "1999-01-01",
   default_type = "X13",
   default_spec_nsa = "RSA2c",
-  default_spec_sa = "RSA2c"
+  default_spec_sa = "RSA2c",
+  java_home = Sys.getenv("JAVA_HOME")
 )
 }
 \arguments{

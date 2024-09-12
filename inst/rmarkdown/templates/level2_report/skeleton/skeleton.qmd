@@ -15,12 +15,16 @@ params:
   default_type: "X13"
   default_spec_nsa: "RSA1"
   default_spec_sa: "RSA2c"
+  java_home: ""
 ---
 
 ```{r}
 #| message: false
 #| warning: false
 
+if(params$java_home != ""){
+  Sys.setenv(JAVA_HOME = params$java_home)
+}
 library(knitr)
 library(kableExtra)
 library(SAvalidation)
