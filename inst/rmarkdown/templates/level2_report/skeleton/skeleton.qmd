@@ -499,7 +499,11 @@ dplyr::tibble(Test = c("Runs test","Up down test"),
 
 ```{r}
 #| output: asis
-if(!check_negatives(nsa) & check_negatives(sa)){
+if (check_negatives(nsa)) {
+  message_to_print <- "Not relevant (negative values in the NSA series)"
+  color <- "#DAFFCD"
+  tab_to_print <- NULL 
+} else if(check_negatives(sa)){
   message_to_print <-"SA series has negative values"
   color <- "#FFCDCD"
   tab_to_print <- dplyr::tibble(Date=zoo::as.Date(stats::time(sa)),
