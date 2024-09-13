@@ -238,8 +238,10 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' data(data_to_check, package = "SAvalidation")
 #' level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
+#' }
 level2_validation <- function(nsa,sa,series_name,
                               output_directory = NULL,
                               dashboard_template="skeleton.qmd",
