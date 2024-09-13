@@ -9,7 +9,7 @@ Authors@R: c(
          comment = c(ORCID = "0000-0001-7890-3857"))
           )
 Description: Functions for running validation checks on a pair of time series, an unadjsuted (NSA) and seasonally adjusted (SA) series.
-License: EUPL
+License: EUPL+ file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
