@@ -3,7 +3,7 @@
 
 # SAvalidation
 
-![r-universe](https://seasadjwg.r-universe.dev.r-universe.dev/badges/SAvalidation)
+![](https://seasadjwg.r-universe.dev/badges/SAvalidation)
 
 SAvalidation provides simple functions for running validation checks on
 seasonally adjusted time series and generating dashboards for further
@@ -16,7 +16,11 @@ You can install the development version of SAvalidation like so:
 ``` r
 # Using r-universe
 install.packages('SAvalidation', repos = c('https://seasadjwg.r-universe.dev', 'https://cloud.r-project.org'))
-# Other solution using devtools
+```
+
+Other solution using devtools:
+
+``` r
 # install.packages("devtools")
 devtools::install_github("SeasAdjwG/SAvalidation")
 ```
@@ -47,7 +51,7 @@ NSA against the SA:
 nsa_sa_plot(data_to_check$nsa, data_to_check$sa)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 Or the derived adjustment factor plot:
 
@@ -56,4 +60,4 @@ adjust_fact_plot(data_to_check$nsa, data_to_check$sa)
 #> Joining with `by = join_by(quarter, year)`
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />

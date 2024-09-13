@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 ```
 
 # SAvalidation
-![r-universe](https://seasadjwg.r-universe.dev.r-universe.dev/badges/SAvalidation) 
+![](https://seasadjwg.r-universe.dev/badges/SAvalidation) 
 
 SAvalidation provides simple functions for running validation checks on seasonally adjusted time series and generating dashboards for further analysis of validation checks. 
 
@@ -25,7 +25,10 @@ You can install the development version of SAvalidation like so:
 ```{r, eval=FALSE}
 # Using r-universe
 install.packages('SAvalidation', repos = c('https://seasadjwg.r-universe.dev', 'https://cloud.r-project.org'))
-# Other solution using devtools
+```
+
+Other solution using devtools:
+```{r, eval=FALSE}
 # install.packages("devtools")
 devtools::install_github("SeasAdjwG/SAvalidation")
 ```
