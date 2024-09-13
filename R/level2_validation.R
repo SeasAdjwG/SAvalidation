@@ -233,6 +233,7 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 #' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
 #' @param default_spec_nsa name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")
 #' @param default_spec_sa name of a default JDemetra+ specification to use for tests on SA series (default is  "RSA2c")
+#' @param java_home JAVA_HOME environment variable
 #'
 #' @return creates an html dashboard with series name in given output directory
 #' @export
