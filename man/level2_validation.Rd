@@ -35,6 +35,8 @@ level2_validation(
 \item{default_spec_nsa}{name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")}
 
 \item{default_spec_sa}{name of a default JDemetra+ specification to use for tests on SA series (default is  "RSA2c")}
+
+\item{java_home}{JAVA_HOME environment variable}
 }
 \value{
 creates an html dashboard with series name in given output directory
@@ -43,6 +45,8 @@ creates an html dashboard with series name in given output directory
 Title
 }
 \examples{
+\donttest{
 data(data_to_check, package = "SAvalidation")
 level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
+}
 }
