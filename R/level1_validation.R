@@ -168,7 +168,11 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
       }
       else{
         max_diff_relative_to_rmse <- rjd3toolkit::compare_annual_totals(nsa,sa)
-        has_negatives <- check_negatives(sa)
+        if(check_negatives(nsa)){
+          has_negatives <- FALSE
+        } else {
+          has_negatives <- check_negatives(sa)
+        }
         has_overadjustment <- check_over_adjustment(sa_mod)
 
 

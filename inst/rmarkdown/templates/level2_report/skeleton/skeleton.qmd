@@ -499,7 +499,7 @@ dplyr::tibble(Test = c("Runs test","Up down test"),
 
 ```{r}
 #| output: asis
-if(check_negatives(sa)){
+if(!check_negatives(nsa) & check_negatives(sa)){
   message_to_print <-"SA series has negative values"
   color <- "#FFCDCD"
   tab_to_print <- dplyr::tibble(Date=zoo::as.Date(stats::time(sa)),
@@ -517,24 +517,6 @@ message_to_print <-
     sprintf('<p style="background-color: %s;">%s</p>', color, message_to_print)
 
 cat(message_to_print)
-
-```
-
-```{r}
-#| output: asis
-if(check_for_calendar_vars(sa_mod)){
-  message_to_print <- 
-    '<p style="background-color: #FFCDCD;">Evidence of residual calendar effects in SA series</p>'
-  
-  cal_effect <- sa_mod$user_defined$preprocessing.model.cal
-  chart_to_print <- cal_effect_plot(nsa,sa,sa_mod)
-}else{
-  message_to_print <- 
-    '<p style="background-color: ##DAFFCD;">Evidence of residual calendar effects in SA series</p>'
-  chart_to_print <- NULL
-}
-
-cat(message_to_print)
 ```
 
 ```{r}
@@ -543,7 +525,7 @@ if(!is.null(tab_to_print))
 ```
 :::
 
-:::
+
 ::: {.card title="Overadjustment check"}
 
 ```{r}
