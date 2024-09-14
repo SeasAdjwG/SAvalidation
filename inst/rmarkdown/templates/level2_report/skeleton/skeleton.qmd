@@ -275,7 +275,7 @@ comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
-  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  ifelse(comb_test_res=="None", "#FFCDCD", "#DAFFCD"),
   comb_test_res
   )
 )
@@ -310,7 +310,7 @@ comb_test_res <- nsa_mod5$diagnostics$combined_test$combined_seasonality_test
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
-  ifelse(comb_test_res=="None", "#DAFFCD", "#FFCDCD"),
+  ifelse(comb_test_res=="None", "#FFCDCD", "#DAFFCD"),
   comb_test_res
   )
 )
