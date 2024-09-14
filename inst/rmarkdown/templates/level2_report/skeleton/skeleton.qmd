@@ -1,5 +1,5 @@
 ---
-title: "Level 2 validation"
+title: "`r params$title`"
 author: "GOPA SA experts"
 date: today
 format: 
@@ -10,6 +10,7 @@ params:
   sa: "NA"
   name: "NA"
   dataset_name: "National Accounts Main Aggregates"
+  title: ""
   start_date: "1999-01-01"
   ts_start: "NA"
   ts_freq: "NA"

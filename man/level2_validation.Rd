@@ -9,6 +9,7 @@ level2_validation(
   sa,
   series_name,
   dataset_name = "National Accounts Main Aggregates",
+  title = series_name,
   output_directory = NULL,
   dashboard_template = "skeleton.qmd",
   start_date = "1999-01-01",
@@ -26,6 +27,8 @@ level2_validation(
 \item{series_name}{a name for the time series to be analysed}
 
 \item{dataset_name}{a name for the dataset}
+
+\item{title}{title}
 
 \item{output_directory}{optional output directory for dashboard (default uses getwd())}
 
