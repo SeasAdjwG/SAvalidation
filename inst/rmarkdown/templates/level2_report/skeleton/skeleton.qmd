@@ -106,7 +106,7 @@ cat(sprintf(
   ifelse(
     substr(l1_out[1],1,1)!="P", "#FFCDCD",
     ifelse(length(grep("WARNING",l1_out))!=0, "#FFECCD", "#DAFFCD")) , 
-  l1_out
+  paste(l1_out, collapse = "<br/>")
 ))
 ```
 
