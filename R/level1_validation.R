@@ -167,20 +167,24 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
       }
       else{
         max_diff_relative_to_rmse <- rjd3toolkit::compare_annual_totals(nsa,sa)
-        if(check_negatives(nsa)){
-          has_negatives <- FALSE
-        } else {
-          has_negatives <- check_negatives(sa)
-        }
+
         has_overadjustment <- check_over_adjustment(sa_mod)
 
 
         annual_totals_message <- ifelse(max_diff_relative_to_rmse > 0.01,
                                         "WARNING: ANNUAL TOTALS CHECK FAILED",
                                         "ANNUAL TOTALS CHECK PASSED")
-        negatives_message <- ifelse(has_negatives,
-                                    "WARNING: SA SERIES HAS NEGATIVE VALUES",
-                                    "NON-NEGATIVE CHECK PASSED")
+        if (check_negatives(nsa)) {
+          has_negatives <- FALSE
+          negatives_message <- NULL
+        } else {
+          has_negatives <- check_negatives(sa)
+          if (check_negatives(sa)) {
+            negatives_message <- "WARNING: SA SERIES HAS NEGATIVE VALUES"
+          } else {
+            negatives_message <- "NO NEGATIVE VALUES IN THE SA SERIES"
+          }
+        }
         over_adjustment_message <- ifelse(has_overadjustment,
                                           "WARNING: SA SERIES HAS EVIDENCE OF OVER-ADJUSTMENT",
                                           "OVER-ADJUSTMENT CHECK PASSED")
