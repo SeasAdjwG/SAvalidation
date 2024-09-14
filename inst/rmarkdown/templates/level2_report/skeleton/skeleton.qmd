@@ -450,6 +450,10 @@ if(check_for_calendar_vars(sa_mod)){
 
 cat(message_to_print)
 ```
+::: 
+
+
+::: {.card title="Regression model"}
 
 ```{r}
 sa_mod$regarima$regression.coefficients |> 
