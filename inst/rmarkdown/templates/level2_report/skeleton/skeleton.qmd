@@ -104,8 +104,8 @@ if(default_type=="X13"){
 cat(sprintf(
   '<p style="background-color: %s;">%s</p>',
   ifelse(
-    substr(l1_out[1],1,1)!="P", "#FFCDCD",
-    ifelse(length(grep("WARNING",l1_out))!=0, "#FFECCD", "#DAFFCD")) , 
+    substr(l1_out[1],1,1)!="P", "#ff4d4d",
+    ifelse(length(grep("WARNING",l1_out))!=0, "#ffc466", "#36cc00")) , 
   paste(l1_out, collapse = "<br/>")
 ))
 ```
@@ -126,9 +126,10 @@ nsa_sa_plot(nsa,sa,title = params$name)
 
 ### Column
 
-::: {.card title="Adjustment factor"}
+::: {.card title="Derived adjustment factor"}
 ```{r}
-adjust_fact_plot(nsa,sa,title = params$name)
+adjust_fact_plot(nsa,sa,title = params$name) +
+      ggplot2::ggtitle(NULL)
 ```
 :::
 
@@ -204,14 +205,14 @@ nsa_sa_plot(nsa,sa,title = params$name)
 
 Plot of the unadjusted (NSA) and seasonally adjusted (SA) series.
 
-## Adjustment factor
+## Derived adjustment factors
 
 
 ```{r}
 #| label: fig-adjustment
-#| fig-cap: "Derived adjustment factors"
 
-adjust_fact_plot(nsa,sa,title = params$name)
+adjust_fact_plot(nsa,sa,title = params$name) +
+      ggplot2::ggtitle(NULL)
 ```
 
 Plot of the derived adjustment factor. Note that if these are fluctuations around 1 this is because an automatic test for transformation on the NSA series has concluded that the series is likely to have multiplicative decomposition, while if they are fluctuations around 0 the test concluded the series has an additive decomposition.
