@@ -121,7 +121,9 @@ cat(sprintf(
 
 ::: {.card title="NSA and SA"}
 ```{r}
-nsa_sa_plot(nsa,sa,title = params$name)
+nsa_sa_plot(nsa,sa,title = params$name) +
+  ggplot2::labs(title = NULL, x = NULL, y = NULL) +
+    ggplot2::theme(legend.position="top")
 ```
 :::
 
@@ -130,7 +132,7 @@ nsa_sa_plot(nsa,sa,title = params$name)
 ::: {.card title="Derived adjustment factor"}
 ```{r}
 adjust_fact_plot(nsa,sa,title = params$name) +
-      ggplot2::ggtitle(NULL)
+  ggplot2::labs(title = NULL, x = NULL)
 ```
 :::
 

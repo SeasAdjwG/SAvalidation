@@ -112,7 +112,7 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
     ggplot2::geom_line(ggplot2::aes(y=hline),color="black",linetype=2) +
     ggplot2::facet_grid(.~Quarter)+
     ggplot2::ggtitle(paste("Derived adjustment factors for series", title)) +
-    ggplot2::theme(legend.position="bottom") +
+    ggplot2::theme(legend.position="top") +
     ggplot2::scale_colour_discrete(guide = ggplot2::guide_legend(title.position = "top"))
 
   return(p)
