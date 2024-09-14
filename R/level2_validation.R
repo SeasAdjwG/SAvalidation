@@ -227,6 +227,7 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 #' @param nsa ts object (usually unadjusted time series)
 #' @param sa ts object (usually seasonally adjusted time series)
 #' @param series_name a name for the time series to be analysed
+#' @param dataset_name a name for the dataset
 #' @param output_directory optional output directory for dashboard (default uses getwd())
 #' @param dashboard_template name of dashboard template to use
 #' @param start_date Character defining start date in format "YYYY-MM-DD"
@@ -244,6 +245,7 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 #' level2_validation(data_to_check$nsa,data_to_check$sa,data_to_check$name)
 #' }
 level2_validation <- function(nsa,sa,series_name,
+                              dataset_name = "National Accounts Main Aggregates",
                               output_directory = NULL,
                               dashboard_template="skeleton.qmd",
                               start_date="1999-01-01",
@@ -276,6 +278,7 @@ level2_validation <- function(nsa,sa,series_name,
                   nsa = nsa,
                   sa = sa,
                   name = series_name,
+                  dataset_name = dataset_name,
                   ts_start = ts_start,
                   ts_freq = ts_freq,
                   start_date = start_date,

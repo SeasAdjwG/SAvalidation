@@ -9,6 +9,7 @@ params:
   nsa: "NA"
   sa: "NA"
   name: "NA"
+  dataset_name: "National Accounts Main Aggregates"
   start_date: "1999-01-01"
   ts_start: "NA"
   ts_freq: "NA"
@@ -89,7 +90,7 @@ if(default_type=="X13"){
 
 |                        |                                   |
 |------------------------|-----------------------------------|
-| **Dataset**            | National Accounts Main Aggregates |
+| **Dataset**            | `{r} params$dataset_name` |
 | **Series**             | `{r} params$name`          |
 | **First time period**  | `{r} params$start_date`           |
 
