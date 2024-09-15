@@ -102,13 +102,38 @@ if(default_type=="X13"){
 ```{r}
 #| output: asis
 
-cat(sprintf(
-  '<p style="background-color: %s;">%s</p>',
-  ifelse(
-    substr(l1_out[1],1,1)!="P", "#ff4d4d",
-    ifelse(length(grep("WARNING",l1_out))!=0, "#ffc466", "#36cc00")) , 
-  paste(l1_out, collapse = "<br/>")
-))
+if(substr(l1_out[1],1,1)!="P") {
+  color <- "#FFCDCD"
+  cat(sprintf(
+    '<p style="background-color: %s;">%s</p>',
+    color, 
+    paste(l1_out, collapse = "<br/> ")
+  ))
+} else {
+  i_warning <- grep("WARNING",l1_out)
+  if(length(i_warning)!=0){
+    
+    cat(sprintf(
+      '<p style="background-color: %s;">%s</p>',
+      "#DAFFCD", 
+      paste(l1_out[-i_warning], collapse = "<br/>")
+    ))
+    
+    cat(sprintf(
+      '<p style="background-color: %s;">%s</p>',
+      "#FFECCD", 
+      paste(c("WARNING:", gsub("WARNING: ", "", l1_out[i_warning])), 
+            collapse = "<br/> ")
+    ))
+  } else {
+    color <- "#DAFFCD"
+    cat(sprintf(
+      '<p style="background-color: %s;">%s</p>',
+      color, 
+      paste(l1_out, collapse = "<br/> ")
+    ))
+  }
+}
 ```
 
 ------------------------------------------------------------------------
