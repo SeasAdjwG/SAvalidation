@@ -185,7 +185,7 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
                                           "WARNING: SA SERIES HAS EVIDENCE OF OVER-ADJUSTMENT",
                                           "OVER-ADJUSTMENT CHECK PASSED")
         return(c("PASS:",
-                 "NSA SERIES HAS EVIDENCE OF SEASONALITY AND NSA <> SA",
+                 "NSA SERIES HAS EVIDENCE OF SEASONALITY AND NSA != SA",
                  "SA SERIES HAS NO EVIDENCE OF RESIDUAL SEASONAL OR CALENDAR EFFECTS",
                  annual_totals_message,
                  negatives_message,
