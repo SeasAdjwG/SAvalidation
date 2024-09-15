@@ -147,25 +147,21 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
 
 
   is_nsa_seasonal <- tolower(get_combined_seasonality_test(nsa_mod))
-
+  is_nsa_equal_sa <- check_identical(nsa,sa)
   if(is_nsa_seasonal=="none"){
-    is_nsa_equal_sa <- check_identical(nsa,sa)
     not_seasonal_message <- ifelse(is_nsa_equal_sa,
                                    "PASS: SERIES HAS NO EVIDENCE OF SEASONALITY AND NSA = SA",
                                    "FAIL: NO EVIDENCE OF SEASONALITY IN NSA BUT SERIES ADJUSTED")
     return(not_seasonal_message)
   } else{
-    is_nsa_equal_sa <- check_identical(nsa,sa)
     if(is_nsa_equal_sa){
       return("FAIL: EVIDENCE OF SEASONALITY IN NSA BUT SA IS NOT ADJUSTED")
-    }
-    else{
+    }else{
       is_sa_seasonal <- tolower(get_combined_seasonality_test(sa_mod))!="none"
       is_sa_calendar <- check_for_calendar_vars(sa_mod)
       if(is_sa_seasonal|is_sa_calendar){
         return("FAIL: EVIDENCE OF RESIDUAL SEASONALITY OR CALENDAR EFFECTS IN SA SERIES")
-      }
-      else{
+      }else{
         max_diff_relative_to_rmse <- rjd3toolkit::compare_annual_totals(nsa,sa)
 
         has_overadjustment <- check_over_adjustment(sa_mod)
@@ -189,7 +185,7 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
                                           "WARNING: SA SERIES HAS EVIDENCE OF OVER-ADJUSTMENT",
                                           "OVER-ADJUSTMENT CHECK PASSED")
         return(c("PASS:",
-                 "NSA SERIES HAS EVIDENCE OF SEASONALITY",
+                 "NSA SERIES HAS EVIDENCE OF SEASONALITY AND NSA <> SA",
                  "SA SERIES HAS NO EVIDENCE OF RESIDUAL SEASONAL OR CALENDAR EFFECTS",
                  annual_totals_message,
                  negatives_message,
