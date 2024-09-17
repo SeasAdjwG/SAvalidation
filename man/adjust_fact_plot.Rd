@@ -11,7 +11,8 @@ adjust_fact_plot(
   easter_lag = 6,
   julian_easter = FALSE,
   default_type = "X13",
-  default_spec_nsa = "RSA2c"
+  default_spec_nsa = "RSA2c",
+  add_mean = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ adjust_fact_plot(
 \item{default_type}{values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode}
 
 \item{default_spec_nsa}{name of a default JDemetra+ specification to use for determining decomposition mode (default is  "RSA2c")}
+
+\item{add_mean}{boolean indicating if the mean by quarter should be added}
 }
 \value{
 A plot of derived adjustment factors

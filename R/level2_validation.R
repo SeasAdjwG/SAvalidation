@@ -60,6 +60,7 @@ nsa_sa_plot <- function(nsa,sa,title=NULL){
 #' @param julian_easter logical, should EAster be a Julian Easter, default FALSE
 #' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
 #' @param default_spec_nsa name of a default JDemetra+ specification to use for determining decomposition mode (default is  "RSA2c")
+#' @param add_mean boolean indicating if the mean by quarter should be added
 #'
 #' @return A plot of derived adjustment factors
 #' @export
@@ -67,7 +68,7 @@ nsa_sa_plot <- function(nsa,sa,title=NULL){
 #' @examples
 #' data(data_to_check, package = "SAvalidation")
 #' adjust_fact_plot(data_to_check$nsa,data_to_check$sa)
-adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=FALSE, default_type = "X13", default_spec_nsa="RSA2c"){
+adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=FALSE, default_type = "X13", default_spec_nsa="RSA2c", add_mean = TRUE){
 
   check_nsa_sa_ts(nsa,sa)
   if(!default_type%in%c("X13","TS")){stop(paste(default_type),"is not recognised, change to X13 or TS")}
@@ -95,8 +96,7 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
            year = lubridate::year(easter_date)) |>
     dplyr::group_by(year,quarter) |>
     dplyr::summarise(Easter_w=length(easter_date))
-
-  p <- dplyr::tibble(Date = zoo::as.Date(time(sa)),NSA=nsa,SA=sa,decomp=decomp_mode) |>
+  data_plot <- dplyr::tibble(Date = zoo::as.Date(time(sa)),NSA=nsa,SA=sa,decomp=decomp_mode) |>
     dplyr::mutate(Adjustment= ifelse(decomp=="Multiplicative",NSA/SA,NSA-SA),
                   hline = ifelse(decomp=="Multiplicative",1,0),
                   quarter = lubridate::quarter(Date),
@@ -106,15 +106,20 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
                         names_to = "Series",
                         values_to = "Value") |>
     dplyr::left_join(easter_info_q)|>
-    dplyr::mutate(`Easter window days in quarter` = as.factor(ifelse(is.na(Easter_w),0,Easter_w))) |>
-    ggplot2::ggplot(ggplot2::aes(x=Date,y=Adjustment,color = `Easter window days in quarter`))+
+    dplyr::mutate(`Easter window days in quarter` = as.factor(ifelse(is.na(Easter_w),0,Easter_w)))
+
+  p <- ggplot2::ggplot(data_plot, ggplot2::aes(x=Date,y=Adjustment,color = `Easter window days in quarter`))+
     ggplot2::geom_point()+
     ggplot2::geom_line(ggplot2::aes(y=hline),color="black",linetype=2) +
     ggplot2::facet_grid(.~Quarter)+
     ggplot2::ggtitle(paste("Derived adjustment factors for series", title)) +
     ggplot2::theme(legend.position="top") +
     ggplot2::scale_colour_discrete(guide = ggplot2::guide_legend(title.position = "top"))
-
+  if(add_mean) {
+    p <- p +
+      ggplot2::geom_hline(data = data_plot  |> dplyr::group_by(Quarter) |>  dplyr::summarise(mean = mean(Adjustment)),
+                          ggplot2::aes(yintercept = mean))
+  }
   return(p)
 
 }
