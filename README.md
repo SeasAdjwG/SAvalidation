@@ -3,7 +3,7 @@
 
 # SAvalidation
 
-![](https://seasadjwg.r-universe.dev/badges/SAvalidation)
+[![](https://seasadjwg.r-universe.dev/badges/SAvalidation)](https://seasadjwg.r-universe.dev/SAvalidation)
 
 SAvalidation provides simple functions for running validation checks on
 seasonally adjusted time series and generating dashboards for further
