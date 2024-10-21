@@ -17,10 +17,14 @@ NULL
 #' @examples
 #' data(data_to_check)
 #' nsa <- data_to_check$nsa
-#' jd_mod <- RJDemetra::x13(nsa)
+#' jd_mod <- RJDemetra::jx13(nsa)
 #' get_combined_seasonality_test(jd_mod)
 get_combined_seasonality_test <- function(sa_mod){
-  result <- sa_mod$diagnostics$combined_test$combined_seasonality_test
+  if(inherits(sa_mod, "jSA")) {
+    result <- RJDemetra::get_indicators(sa_mod, "diagnostics.combined.all.summary")[[1]]
+  } else {
+    result <- sa_mod$diagnostics$combined_test$combined_seasonality_test
+  }
   return(result)
 }
 
@@ -37,7 +41,18 @@ get_combined_seasonality_test <- function(sa_mod){
 #' jd_mod <- RJDemetra::x13(nsa)
 #' check_for_calendar_vars(jd_mod)
 check_for_calendar_vars <- function(sa_mod){
-  regressors <- sa_mod$regarima$regression.coefficients |>
+  if(inherits(sa_mod, "jSA")) {
+    regression.coefficients <- RJDemetra::get_indicators(sa_mod, "model.coefficients")[[1]]
+    if (!is.null(regression.coefficients)){
+      regression.tstat <- regression.coefficients[,1]/regression.coefficients[,2]
+      regression.coefficients <- cbind(regression.coefficients,regression.tstat)
+      rownames(regression.coefficients) <- RJDemetra::result(jrobj,"model.description")[[1]]
+      colnames(regression.coefficients) <- c("Estimate","Std. Error","T-stat")
+    }
+  } else {
+    regression.coefficients <- sa_mod$regarima$regression.coefficients
+  }
+  regressors <- regression.coefficients |>
     rownames() |>
     tolower()
   has_easter <- length(grep("easter",regressors))!=0
@@ -94,10 +109,15 @@ check_negatives <- function(series_to_check){
 #' @examples
 #' data(data_to_check)
 #' sa <- data_to_check$sa
-#' jd_mod <- RJDemetra::x13(sa,userdefined="preprocessing.model.y_lin")
+#' jd_mod <- RJDemetra::x13(sa)
 #' check_over_adjustment(jd_mod)
 check_over_adjustment <- function(sa_mod,pval=0.05){
-  lin_sa <- sa_mod$user_defined$`preprocessing.model.y_lin` |>
+  if(inherits(sa_mod, "jSA")) {
+    y_lin <- RJDemetra::get_indicators(sa_mod, "preprocessing.model.y_lin")[[1]]
+  } else {
+    y_lin <- sa_mod$regarima$model$effects[,"y_lin"]
+  }
+  lin_sa <- y_lin |>
     diff()
   n <- length(lin_sa)
   p <- stats::frequency(lin_sa)
@@ -129,20 +149,16 @@ level1_validation <- function(nsa,sa, default_type = "X13", default_spec_nsa="RS
   if(!default_type%in%c("X13","TS")){stop("default_type must be `X13` or `TS`")}
 
   if(default_type=="TS"){
-    nsa_mod <- RJDemetra::tramoseats(nsa,
-                                     spec = default_spec_nsa,
-                                     userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
-    sa_mod <- RJDemetra::tramoseats(sa,
-                                    spec = default_spec_sa,
-                                    userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
+    nsa_mod <- RJDemetra::jtramoseats(nsa,
+                                     spec = default_spec_nsa)
+    sa_mod <- RJDemetra::jtramoseats(sa,
+                                    spec = default_spec_sa)
   }
   if(default_type=="X13"){
-    nsa_mod <- RJDemetra::x13(nsa,
-                              spec = default_spec_nsa,
-                              userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
-    sa_mod <- RJDemetra::x13(sa,
-                             spec = default_spec_sa,
-                             userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
+    nsa_mod <- RJDemetra::jx13(nsa,
+                              spec = default_spec_nsa)
+    sa_mod <- RJDemetra::jx13(sa,
+                             spec = default_spec_sa)
   }
 
 

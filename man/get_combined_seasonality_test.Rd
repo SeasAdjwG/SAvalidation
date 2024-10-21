@@ -18,6 +18,6 @@ Extract combined test for seasonality on linearised series
 \examples{
 data(data_to_check)
 nsa <- data_to_check$nsa
-jd_mod <- RJDemetra::x13(nsa)
+jd_mod <- RJDemetra::jx13(nsa)
 get_combined_seasonality_test(jd_mod)
 }

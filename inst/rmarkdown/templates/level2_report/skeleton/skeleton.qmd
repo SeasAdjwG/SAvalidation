@@ -14,7 +14,7 @@ params:
   start_date: "1999-01-01"
   ts_start: "NA"
   ts_freq: "NA"
-  default_type: "X13"
+  default_type: "jx13"
   default_spec_nsa: "RSA1"
   default_spec_sa: "RSA2c"
   java_home: ""
@@ -55,32 +55,24 @@ l1_out <- level1_validation(nsa,sa,
 start_5yr <- end(nsa)-5
 
 if(default_type=="TS"){
-  nsa_mod <- RJDemetra::tramoseats(nsa,
-                                   spec = default_spec_nsa,
-                                   userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
-  sa_mod <- RJDemetra::tramoseats(sa,
-                                  spec = default_spec_sa,
-                                  userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
-  nsa_mod5 <- RJDemetra::tramoseats(window(nsa,start=start_5yr),
-                                    spec = default_spec_nsa,
-                                    userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
-  sa_mod5 <- RJDemetra::tramoseats(window(sa,start=start_5yr),
-                                   spec = default_spec_sa,
-                                   userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
+  nsa_mod <- RJDemetra::jtramoseats(nsa,
+                                   spec = default_spec_nsa)
+  sa_mod <- RJDemetra::jtramoseats(sa,
+                                  spec = default_spec_sa)
+  nsa_mod5 <- RJDemetra::jtramoseats(window(nsa,start=start_5yr),
+                                    spec = default_spec_nsa)
+  sa_mod5 <- RJDemetra::jtramoseats(window(sa,start=start_5yr),
+                                   spec = default_spec_sa)
 }
 if(default_type=="X13"){
-  nsa_mod <- RJDemetra::x13(nsa,
-                            spec = default_spec_nsa,
-                            userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
-  sa_mod <- RJDemetra::x13(sa,
-                           spec = default_spec_sa,
-                           userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
-  nsa_mod5 <- RJDemetra::x13(window(nsa,start=start_5yr),
-                             spec = default_spec_nsa,
-                             userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
-  sa_mod5 <- RJDemetra::x13(window(sa,start=start_5yr),
-                            spec = default_spec_sa,
-                            userdefined = RJDemetra::user_defined_variables("X13-ARIMA"))
+  nsa_mod <- RJDemetra::jx13(nsa,
+                            spec = default_spec_nsa)
+  sa_mod <- RJDemetra::jx13(sa,
+                           spec = default_spec_sa)
+  nsa_mod5 <- RJDemetra::jx13(window(nsa,start=start_5yr),
+                             spec = default_spec_nsa)
+  sa_mod5 <- RJDemetra::jx13(window(sa,start=start_5yr),
+                            spec = default_spec_sa)
   
 }
 ```
@@ -166,8 +158,7 @@ adjust_fact_plot(nsa,sa,title = params$name) +
 ::: {.card title="Test for seasonality in NSA"}
 ```{r}
 #| output: asis
-comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
-
+comb_test_res <- get_combined_seasonality_test(nsa_mod)
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
   ifelse(comb_test_res=="None", "#FFCDCD", 
@@ -185,7 +176,7 @@ cat(sprintf(
 ::: {.card title="Test for seasonality in SA"}
 ```{r}
 #| output: asis
-comb_test_res <- sa_mod$diagnostics$combined_test$combined_seasonality_test
+comb_test_res <- get_combined_seasonality_test(sa_mod)
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
@@ -207,7 +198,7 @@ if(check_for_calendar_vars(sa_mod)){
   message_to_print <- 
     '<p style="background-color: #FFCDCD;">Evidence of residual calendar effects in SA series</p>'
   
-  cal_effect <- sa_mod$user_defined$preprocessing.model.cal
+  cal_effect <- RJDemetra::get_indicators(sa_mod, "preprocessing.model.cal")[[1]]
 }else{
   message_to_print <- 
     '<p style="background-color: #DAFFCD;">No evidence of residual calendar effects in SA series</p>'
@@ -217,7 +208,14 @@ cat(message_to_print)
 ```
 
 ```{r}
-sa_mod$regarima$regression.coefficients |> 
+regression.coefficients <- RJDemetra::get_indicators(sa_mod, "model.coefficients")[[1]]
+if (!is.null(regression.coefficients)){
+  regression.tstat <- regression.coefficients[,1]/regression.coefficients[,2]
+  regression.coefficients <- cbind(regression.coefficients,regression.tstat)
+  rownames(regression.coefficients) <- RJDemetra::result(jrobj,"model.description")[[1]]
+  colnames(regression.coefficients) <- c("Estimate","Std. Error","T-stat")
+}
+regression.coefficients |> 
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"', escape = FALSE) |> 
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 ```
@@ -307,7 +305,7 @@ Plot of the unadjusted (NSA) and seasonally adjusted (SA) series.
 
 ```{r}
 #| output: asis
-comb_test_res <- nsa_mod$diagnostics$combined_test$combined_seasonality_test
+comb_test_res <- get_combined_seasonality_test(nsa_mod)
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
@@ -322,19 +320,16 @@ cat(sprintf(
 ```
 
 ```{r}
+residuals_tests_names <- sprintf("diagnostics.%s",
+                                  c("seas-lin-f",
+                                    "seas-lin-qs",
+                                    "seas-lin-kw",
+                                    "seas-lin-friedman",
+                                    "seas-lin-periodogram"))
+test_results <- do.call(rbind,RJDemetra::get_indicators(nsa_mod, residuals_tests_names))
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
-              `Test statistic` = c(
-                nsa_mod$user_defined$`diagnostics.seas-lin-f`[1],
-                nsa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
-                nsa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
-                nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[1],
-                nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[1]),
-              `P-value` = c(
-                nsa_mod$user_defined$`diagnostics.seas-lin-f`[2],
-                nsa_mod$user_defined$`diagnostics.seas-lin-qs`[2],
-                nsa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
-                nsa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
-                nsa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+              `Test statistic` = test_results[,1],
+              `P-value` = test_results[,2]) |>
   dplyr::mutate(`P-value` = cell_spec(sprintf("%.3f", `P-value`),
                                       background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"',escape = FALSE) |> 
@@ -346,7 +341,7 @@ dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
 
 ```{r}
 #| output: asis
-comb_test_res <- nsa_mod5$diagnostics$combined_test$combined_seasonality_test
+comb_test_res <- get_combined_seasonality_test(nsa_mod5)
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
@@ -361,17 +356,16 @@ cat(sprintf(
 ```
 
 ```{r}
+residuals_tests_names <- sprintf("diagnostics.%s",
+                                  c("seas-lin-f",
+                                    "seas-lin-qs",
+                                    "seas-lin-kw",
+                                    "seas-lin-friedman",
+                                    "seas-lin-periodogram"))
+test_results <- do.call(rbind,RJDemetra::get_indicators(nsa_mod5, residuals_tests_names))
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
-              `Test statistic` = c(nsa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
-                                   nsa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
-                                   nsa_mod5$user_defined$`diagnostics.seas-lin-kw`[1],
-                                   nsa_mod5$user_defined$`diagnostics.seas-lin-friedman`[1],
-                                   nsa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[1]),
-              `P-value` = c(nsa_mod5$user_defined$`diagnostics.seas-lin-f`[2],
-                            nsa_mod5$user_defined$`diagnostics.seas-lin-qs`[2],
-                            nsa_mod5$user_defined$`diagnostics.seas-lin-kw`[2],
-                            nsa_mod5$user_defined$`diagnostics.seas-lin-friedman`[2],
-                            nsa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+              `Test statistic` = test_results[,1],
+              `P-value` = test_results[,2]) |>
   dplyr::mutate(`P-value` = cell_spec(sprintf("%.3f", `P-value`),
                                       background = ifelse(`P-value`<=0.05,"#DAFFCD","#FFCDCD")) ) |>
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"', escape = FALSE) |> 
@@ -386,7 +380,7 @@ dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
 
 ```{r}
 #| output: asis
-comb_test_res <- sa_mod$diagnostics$combined_test$combined_seasonality_test
+comb_test_res <- get_combined_seasonality_test(sa_mod)
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
@@ -402,17 +396,16 @@ cat(sprintf(
 
 
 ```{r}
+residuals_tests_names <- sprintf("diagnostics.%s",
+                                  c("seas-lin-f",
+                                    "seas-lin-qs",
+                                    "seas-lin-kw",
+                                    "seas-lin-friedman",
+                                    "seas-lin-periodogram"))
+test_results <- do.call(rbind,RJDemetra::get_indicators(sa_mod, residuals_tests_names))
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
-              `Test statistic` = c(sa_mod$user_defined$`diagnostics.seas-lin-f`[1],
-                                   sa_mod$user_defined$`diagnostics.seas-lin-qs`[1],
-                                   sa_mod$user_defined$`diagnostics.seas-lin-kw`[1],
-                                   sa_mod$user_defined$`diagnostics.seas-lin-friedman`[1],
-                                   sa_mod$user_defined$`diagnostics.seas-lin-periodogram`[1]),
-              `P-value` = c(sa_mod$user_defined$`diagnostics.seas-lin-f`[2],
-                            sa_mod$user_defined$`diagnostics.seas-lin-qs`[2],
-                            sa_mod$user_defined$`diagnostics.seas-lin-kw`[2],
-                            sa_mod$user_defined$`diagnostics.seas-lin-friedman`[2],
-                            sa_mod$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+              `Test statistic` = test_results[,1],
+              `P-value` = test_results[,2])|>
   dplyr::mutate(`P-value` = cell_spec(sprintf("%.3f", `P-value`),
                                       background = ifelse(`P-value`<=0.05,"#FFCDCD","#DAFFCD")) ) |>
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"', escape = FALSE) |> 
@@ -424,7 +417,7 @@ dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
 ::: {.card title="Seasonality tests on SA series - last 5 years"}
 ```{r}
 #| output: asis
-comb_test_res <- sa_mod5$diagnostics$combined_test$combined_seasonality_test
+comb_test_res <- get_combined_seasonality_test(sa_mod5)
 
 cat(sprintf(
   '<p style="background-color: %s;">Combined test: %s</p>',
@@ -440,17 +433,16 @@ cat(sprintf(
 
 
 ```{r}
+residuals_tests_names <- sprintf("diagnostics.%s",
+                                  c("seas-lin-f",
+                                    "seas-lin-qs",
+                                    "seas-lin-kw",
+                                    "seas-lin-friedman",
+                                    "seas-lin-periodogram"))
+test_results <- do.call(rbind,RJDemetra::get_indicators(sa_mod5, residuals_tests_names))
 dplyr::tibble(Test=c("F-test","QS","Kruskall-Wallis","Friedman","Periodogram"),
-              `Test statistic` = c(sa_mod5$user_defined$`diagnostics.seas-lin-f`[1],
-                                   sa_mod5$user_defined$`diagnostics.seas-lin-qs`[1],
-                                   sa_mod5$user_defined$`diagnostics.seas-lin-kw`[1],
-                                   sa_mod5$user_defined$`diagnostics.seas-lin-friedman`[1],
-                                   sa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[1]),
-              `P-value` = c(sa_mod5$user_defined$`diagnostics.seas-lin-f`[2],
-                            sa_mod5$user_defined$`diagnostics.seas-lin-qs`[2],
-                            sa_mod5$user_defined$`diagnostics.seas-lin-kw`[2],
-                            sa_mod5$user_defined$`diagnostics.seas-lin-friedman`[2],
-                            sa_mod5$user_defined$`diagnostics.seas-lin-periodogram`[2])) |>
+              `Test statistic` = test_results[,1],
+              `P-value` = test_results[,2]) |>
   dplyr::mutate(`P-value` = cell_spec(sprintf("%.3f", `P-value`),
                                       background = ifelse(`P-value`<=0.05,"#FFCDCD","#DAFFCD")) ) |>
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"', escape = FALSE) |> 
@@ -468,7 +460,7 @@ if(check_for_calendar_vars(sa_mod)){
   message_to_print <- 
     '<p style="background-color: #FFCDCD;">Evidence of residual calendar effects in SA series</p>'
   
-  cal_effect <- sa_mod$user_defined$preprocessing.model.cal
+  cal_effect <- RJDemetra::get_indicators(sa_mod, "preprocessing.model.cal")[[1]]
   chart_to_print <- cal_effect_plot(nsa,sa,sa_mod)
 }else{
   message_to_print <- 
@@ -484,7 +476,8 @@ cat(message_to_print)
 ::: {.card title="Regression model"}
 
 ```{r}
-sa_mod$regarima$regression.coefficients |> 
+# already computed
+regression.coefficients |> 
   kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"', escape = FALSE) |> 
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 if(!is.null(chart_to_print)){print(chart_to_print)}
@@ -592,7 +585,8 @@ if(!is.null(tab_to_print))
 
 ```{r}
 
-lin_sa <- sa_mod$user_defined$`preprocessing.model.y_lin` |>
+y_lin <- RJDemetra::get_indicators(sa_mod, "preprocessing.model.y_lin")[[1]]
+lin_sa <- y_lin |>
   diff() 
 n <- length(lin_sa)
 p <- frequency(lin_sa)

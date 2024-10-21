@@ -73,12 +73,12 @@ adjust_fact_plot <- function(nsa,sa, title = NULL,easter_lag = 6,julian_easter=F
   check_nsa_sa_ts(nsa,sa)
   if(!default_type%in%c("X13","TS")){stop(paste(default_type),"is not recognised, change to X13 or TS")}
   if(default_type=="X13"){
-    nsa_mod <- RJDemetra::x13(nsa,spec = default_spec_nsa)
-    decomp_mode <- nsa_mod$decomposition$mode
+    nsa_mod <- RJDemetra::jx13(nsa,spec = default_spec_nsa)
+    decomp_mode <- RJDemetra::get_indicators(nsa_mod, "mode")[[1]]
   }
   if(default_type=="TS"){
-    nsa_mod <- RJDemetra::tramoseats(nsa,spec = default_spec_nsa)
-    decomp_mode <- nsa_mod$decomposition$mode
+    nsa_mod <- RJDemetra::jtramoseats(nsa,spec = default_spec_nsa)
+    decomp_mode <- RJDemetra::get_indicators(nsa_mod, "mode")[[1]]
   }
 
   start_yr <- stats::start(nsa)[1]
@@ -185,12 +185,12 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
   check_nsa_sa_ts(nsa,sa)
   if(!default_type%in%c("X13","TS")){stop(paste(default_type),"is not recognised, change to X13 or TS")}
   if(default_type=="X13"){
-    nsa_mod <- RJDemetra::x13(nsa,spec = default_spec_nsa)
-    decomp_mode <- nsa_mod$decomposition$mode
+    nsa_mod <- RJDemetra::jx13(nsa,spec = default_spec_nsa)
+    decomp_mode <- RJDemetra::get_indicators(nsa_mod, "mode")[[1]]
   }
   if(default_type=="TS"){
-    nsa_mod <- RJDemetra::tramoseats(nsa,spec = default_spec_nsa)
-    decomp_mode <- nsa_mod$decomposition$mode
+    nsa_mod <- RJDemetra::jtramoseats(nsa,spec = default_spec_nsa)
+    decomp_mode <- RJDemetra::get_indicators(nsa_mod, "mode")[[1]]
   }
 
 

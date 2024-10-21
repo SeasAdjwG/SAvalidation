@@ -20,6 +20,6 @@ Tests null hypothesis that acf at lag 4 is greater or equal to zero
 \examples{
 data(data_to_check)
 sa <- data_to_check$sa
-jd_mod <- RJDemetra::x13(sa,userdefined="preprocessing.model.y_lin")
+jd_mod <- RJDemetra::x13(sa)
 check_over_adjustment(jd_mod)
 }
