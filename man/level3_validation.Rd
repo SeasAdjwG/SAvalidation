@@ -43,8 +43,6 @@ level3_validation(
 
 \item{default_spec_nsa}{name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")}
 
-\item{default_spec_sa}{name of a default JDemetra+ specification to use for tests on SA series (default is  "RSA2c")}
-
 \item{java_home}{JAVA_HOME environment variable}
 }
 \value{
@@ -58,6 +56,6 @@ Level 3 validation
 data(vintages, package = "SAvalidation")
 nsa <- ts(vintages$nsa_vert[,"2024-01-01"], start=1999, frequency = 4)
 sa <- ts(vintages$sa_vert[,"2024-01-01"], start=1999, frequency = 4)
-level3_validation(nsa,sa,"test",vintages)
+level3_validation(nsa,sa,"test","vintages")
 }
 }

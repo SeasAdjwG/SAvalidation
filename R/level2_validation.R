@@ -229,7 +229,7 @@ cal_effect_plot <- function(nsa,sa,sa_mod, title = NULL, default_type = "X13", d
 
 
 
-#' Title
+#' Level 2 validation
 #'
 #' @param nsa ts object (usually unadjusted time series)
 #' @param sa ts object (usually seasonally adjusted time series)

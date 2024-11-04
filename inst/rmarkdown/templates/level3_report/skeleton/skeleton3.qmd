@@ -97,10 +97,7 @@ if(default_type=="X13"){
 }
 ```
 
-# Level 1 validation
-
-
-**This dashboard displays validation results for:**
+**This report displays validation results for:**
 
 |                        |                                   |
 |------------------------|-----------------------------------|
@@ -110,7 +107,10 @@ if(default_type=="X13"){
 
 ------------------------------------------------------------------------
 
-**Level 1 validation results**
+
+
+# Level 1 validation
+
 
 ```{r}
 #| output: asis
@@ -154,6 +154,8 @@ if(substr(l1_out[1],1,1)!="P") {
 
 # Level 2 validation
 
+These are the results of the level 2 validation for the NSA and SA series presented in a report rather than a dashboard. Use `level2_validation()` function from the SAvalidation package to view these results as a dashboard.
+
 ## Summary
 
 ### NSA and SA
@@ -167,6 +169,8 @@ nsa_sa_plot(nsa,sa,title = params$name) +
 ### Derived adjustment factor
 
 ```{r}
+#| message: false
+
 adjust_fact_plot(nsa,sa,title = params$name) +
   ggplot2::labs(title = NULL, x = NULL)
 ```
@@ -254,6 +258,8 @@ Plot of the unadjusted (NSA) and seasonally adjusted (SA) series.
 
 ```{r}
 #| label: fig-adjustment
+#| message: false
+
 
 adjust_fact_plot(nsa,sa,title = params$name) +
       ggplot2::ggtitle(NULL)
@@ -610,13 +616,14 @@ dplyr::tibble(Date = zoo::as.Date(stats::time(nsa)),NSA=nsa,SA=sa) |>
 
 # Level 3 validation
 
-## Default models
+## Default model results
 
 Both the NSA and SA series were adjusted using the default models specified by the user. The main results of these models are summarised below.
 
 ### NSA
 
 #### RegARIMA model summary
+
 ```{r}
 print(summary(nsa_mod$regarima))
 ```
@@ -627,12 +634,12 @@ print(summary(nsa_mod$regarima))
 print(nsa_mod$diagnostics)
 ```
 
-#### Q statistics
+#### M and Q statistics
 ```{r}
 if(default_type=="X13"){
   print(nsa_mod$decomposition)
 } else {
-  print("The Q statistics are not available for TRAMO-SEATS models")
+  print("The M and Q statistics are not available for TRAMO-SEATS models")
 }
 ```
 
@@ -666,6 +673,7 @@ if(default_type=="X13"){
 #| label: fig-sa-to-default
 #| fig-cap: "Plot of published SA series compared to upper and lower confidence bands of a default model"
 #| message: false
+#| warning: false
 
 SAvalidation::level3_comparisons_plot(nsa,sa,series_name)
 
@@ -683,12 +691,20 @@ This includes simple plots of the vintages of the NSA and SA series, and a basic
 ```{r}
 nsa_vints <- rjd3revisions::create_vintages(nsa_vert,type = "vertical",periodicity = 4)
 sa_vints <- rjd3revisions::create_vintages(sa_vert,type = "vertical",periodicity = 4)
+
+if(nsa_mod$decomposition$mode == "Multiplicative"){
+  s_vints <- rjd3revisions::create_vintages(nsa_vert/sa_vert,type = "vertical",periodicity = 4)
+}else{
+  s_vints <- rjd3revisions::create_vintages(nsa_vert-sa_vert,type = "vertical",periodicity = 4)
+}
 ```
 
 ```{r}
 #| label: fig-nsa-vintages
 #| fig-cap: "Plot of NSA vintages"
 #| message: false
+#| warning: false
+
 
 plot(nsa_vints,main="NSA vintages")
 ```
@@ -697,8 +713,18 @@ plot(nsa_vints,main="NSA vintages")
 #| label: fig-sa-vintages
 #| fig-cap: "Plot of SA vintages"
 #| message: false
+#| warning: false
 
 plot(sa_vints,main="SA vintages")
+```
+
+```{r}
+#| label: fig-s-vintages
+#| fig-cap: "Plot of derived adjustment factor vintages"
+#| message: false
+#| warning: false
+
+plot(s_vints,main="S vintages")
 ```
 
 ### Plot of revisions
@@ -706,6 +732,7 @@ plot(sa_vints,main="SA vintages")
 ```{r}
 revisions_nsa <- rjd3revisions::get_revisions(nsa_vints,gap = 1)
 revisions_sa <- rjd3revisions::get_revisions(sa_vints, gap = 1)
+revisions_s <- rjd3revisions::get_revisions(s_vints, gap = 1)
 ```
 
 Plots of "vertical revisions" for the NSA and SA series. These plots show the revisions that have occurred at each vintage point.
@@ -714,6 +741,7 @@ Plots of "vertical revisions" for the NSA and SA series. These plots show the re
 #| label: fig-revisions-nsa
 #| fig-cap: "Revisions for NSA series"
 #| message: false
+#| warning: false
 
 plot(revisions_nsa)
 ```
@@ -722,30 +750,50 @@ plot(revisions_nsa)
 #| label: fig-revisions-sa
 #| fig-cap: "Revisions for SA series"
 #| message: false
+#| warning: false
 
 plot(revisions_sa)
 ```
 
+```{r}
+#| label: fig-revisions-s
+#| fig-cap: "Revisions for derived adjustment factor"
+#| message: false
+#| warning: false
+
+plot(revisions_s)
+```
 
 ### Test for bias in "diagonal" revisions
 
+@tbl-bias shows the results of a test for bias in the lag 1 diagonal revisions. The test is based on the null hypothesis that the revisions are unbiased. Note that the test statistic is based on the adjusted t-test statistic, which accounts for the autocorrelation in the revisions. For further information see the vignette for the `rjd3revisions` package.
+
 ```{r}
+#| label: tbl-bias
+#| tbl-cap: "Test for bias in lag 1 diagonal revisions"
+
 bias_nsa <- rjd3revisions::bias(revisions_nsa$diagonal_view)
 bias_sa <- rjd3revisions::bias(revisions_sa$diagonal_view)
+bias_s <- rjd3revisions::bias(revisions_s$diagonal_view)
 
 temp <- rbind(bias_nsa[1,c("N","estimate","stderr.adjusted", "tstat.adjusted", "pvalue.adjusted")],
-          bias_sa[1,c("N","estimate","stderr.adjusted", "tstat.adjusted", "pvalue.adjusted")])
+          bias_sa[1,c("N","estimate","stderr.adjusted", "tstat.adjusted", "pvalue.adjusted")],
+          bias_s[1,c("N","estimate","stderr.adjusted", "tstat.adjusted", "pvalue.adjusted")])
 
-rownames(temp) <- c("NSA","SA")
+rownames(temp) <- c("NSA","SA","Adjustment Factor")
 colnames(temp) <- c("N","Estimate","Standard error","t-statistic","P-value")
 
 temp |>
-  dplyr::as_tibble() |>
-  dplyr::mutate(Series = rownames(temp), 
-    `P-value`= kableExtra::cell_spec(round(`P-value`,4),
+  as.data.frame() |>
+  dplyr::mutate(`P-value`= kableExtra::cell_spec(round(`P-value`,4),
                                      background=(ifelse(`P-value`<=0.05 ,"#FFCDCD","#DAFFCD")))
   )|>
-  kableExtra::kbl(digits = 3, format.args = list(digits = 3, nsmall = 3), align = "lrr", table.attr = 'data-quarto-disable-processing="true"', escape = FALSE) |>
+  kableExtra::kbl(digits = 3, 
+                  format.args = list(digits = 3, nsmall = 3), 
+                  align = "lrr", 
+                  table.attr = 'data-quarto-disable-processing="true"', 
+                  escape = FALSE,
+                  row.names = TRUE) |>
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("basic", "striped"), font_size = 12)
 ```
 

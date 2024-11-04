@@ -11,7 +11,6 @@
 #' @param start_date Character defining start date in format "YYYY-MM-DD"
 #' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
 #' @param default_spec_nsa name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")
-#' @param default_spec_sa name of a default JDemetra+ specification to use for tests on SA series (default is  "RSA2c")
 #' @param java_home JAVA_HOME environment variable
 #'
 #' @return creates an html document with series name in given output directory
@@ -22,7 +21,7 @@
 #' data(vintages, package = "SAvalidation")
 #' nsa <- ts(vintages$nsa_vert[,"2024-01-01"], start=1999, frequency = 4)
 #' sa <- ts(vintages$sa_vert[,"2024-01-01"], start=1999, frequency = 4)
-#' level3_validation(nsa,sa,"test",vintages)
+#' level3_validation(nsa,sa,"test","vintages")
 #' }
 level3_validation <- function(nsa,sa,series_name,vintages=NULL,
                               dataset_name = NULL,
@@ -107,8 +106,15 @@ level3_comparisons_plot <- function(nsa,sa,series_name,
                                      spec = default_spec_nsa,
                                      userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
 
+  if(nsa_mod$regarima$model$spec_rslt[,"Log transformation"]){
+    mod0_spec <- RJDemetra::tramoseats_spec(spec = "RSA0",
+                                 transform.function = "Log")
+  }else{
+    mod0_spec <- RJDemetra::tramoseats_spec(spec = "RSA0")
+  }
+
   nsa_mod_0 <- RJDemetra::tramoseats(nsa,
-                                   spec = "RSA0",
+                                   spec = mod0_spec,
                                    userdefined = RJDemetra::user_defined_variables("TRAMO-SEATS"))
 
   sa_se_est <- nsa_mod_0$user_defined$decomposition.sa_cmp_e
