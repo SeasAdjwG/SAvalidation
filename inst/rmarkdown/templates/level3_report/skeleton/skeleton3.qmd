@@ -44,7 +44,7 @@ default_spec_sa <- params$default_spec_sa
 nsa <- stats::ts(params$nsa,start=params$ts_start,frequency = params$ts_freq)
 sa <- stats::ts(params$sa,start=params$ts_start,frequency = params$ts_freq)
 series_name <- params$name
-vintages <- get(params$vintages)
+vintages <- readRDS(params$vintages)
 nsa_vert <- vintages$nsa_vert
 sa_vert <- vintages$sa_vert
 

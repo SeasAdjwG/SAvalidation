@@ -27,7 +27,7 @@ level3_validation(
 
 \item{series_name}{a name for the time series to be analysed}
 
-\item{vintages}{a list with two elements, nsa_vert and sa_vert, each of which is a matrix with columns as dates and rows as vintages}
+\item{vintages}{a list object with two elements, nsa_vert and sa_vert, each of which is a matrix with columns as dates and rows as vintages}
 
 \item{dataset_name}{a name for the dataset}
 

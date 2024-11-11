@@ -3,7 +3,7 @@
 #' @param nsa ts object (usually unadjusted time series)
 #' @param sa ts object (usually seasonally adjusted time series)
 #' @param series_name a name for the time series to be analysed
-#' @param vintages a list with two elements, nsa_vert and sa_vert, each of which is a matrix with columns as dates and rows as vintages
+#' @param vintages a list object with two elements, nsa_vert and sa_vert, each of which is a matrix with columns as dates and rows as vintages
 #' @param dataset_name a name for the dataset
 #' @param title title
 #' @param output_directory optional output directory for dashboard (default uses getwd())
@@ -48,16 +48,19 @@ level3_validation <- function(nsa,sa,series_name,vintages=NULL,
 
   file.copy(dashboard_template_to_copy,dashboard_to_create,overwrite = TRUE)
 
+  vint_file <- file.path(output_directory,"vintages.RDS")
+  saveRDS(vintages,file = vint_file)
 
   check_nsa_sa_ts(nsa,sa)
 
   ts_start <- stats::start(nsa)
   ts_freq <- stats::frequency(nsa)
+
   quarto::quarto_render(dashboard_to_create,
                         execute_params =  list(
                           nsa = nsa,
                           sa = sa,
-                          vintages = vintages,
+                          vintages = vint_file,
                           name = series_name,
                           dataset_name = dataset_name,
                           title = title,
@@ -69,6 +72,7 @@ level3_validation <- function(nsa,sa,series_name,vintages=NULL,
                           default_spec_sa = default_spec_sa,
                           java_home = java_home
                         ))
+  file.remove(vint_file)
 
 }
 
