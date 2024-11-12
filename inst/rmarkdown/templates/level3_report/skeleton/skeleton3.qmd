@@ -14,7 +14,6 @@ params:
   name: "NA"
   dataset_name: "NA"
   title: ""
-  start_date: "1999-01-01"
   ts_start: "NA"
   ts_freq: "NA"
   default_type: "X13"
@@ -57,7 +56,6 @@ if(any(is.na(sa))){stop("sa series is missing")}
 
 if(!is.ts(nsa)){stop(paste("nsa is not a time series it has class",class(nsa),nsa))}
 
-start_yr <- as.numeric(substr(params$start_date,1,4))
 
 l1_out <- level1_validation(nsa,sa,
                             default_type = default_type,
@@ -103,7 +101,6 @@ if(default_type=="X13"){
 |------------------------|-----------------------------------|
 | **Dataset**            | `{r} params$dataset_name` |
 | **Series**             | `{r} params$name`          |
-| **First time period**  | `{r} params$start_date`           |
 
 ------------------------------------------------------------------------
 

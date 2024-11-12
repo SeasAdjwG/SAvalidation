@@ -8,7 +8,6 @@
 #' @param title title
 #' @param output_directory optional output directory for dashboard (default uses getwd())
 #' @param dashboard_template name of dashboard template to use
-#' @param start_date Character defining start date in format "YYYY-MM-DD"
 #' @param default_type values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode
 #' @param default_spec_nsa name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")
 #' @param java_home JAVA_HOME environment variable
@@ -21,14 +20,13 @@
 #' data(vintages, package = "SAvalidation")
 #' nsa <- ts(vintages$nsa_vert[,"2024-01-01"], start=1999, frequency = 4)
 #' sa <- ts(vintages$sa_vert[,"2024-01-01"], start=1999, frequency = 4)
-#' level3_validation(nsa,sa,"test","vintages")
+#' level3_validation(nsa,sa,"test",vintages)
 #' }
 level3_validation <- function(nsa,sa,series_name,vintages=NULL,
                               dataset_name = NULL,
                               title = series_name,
                               output_directory = NULL,
                               dashboard_template="skeleton3.qmd",
-                              start_date="1999-01-01",
                               default_type = "X13",
                               default_spec_nsa="RSA2c",
                               default_spec_sa="RSA2c",
@@ -66,7 +64,6 @@ level3_validation <- function(nsa,sa,series_name,vintages=NULL,
                           title = title,
                           ts_start = ts_start,
                           ts_freq = ts_freq,
-                          start_date = start_date,
                           default_type = default_type,
                           default_spec_nsa = default_spec_nsa,
                           default_spec_sa = default_spec_sa,

@@ -13,7 +13,6 @@ level3_validation(
   title = series_name,
   output_directory = NULL,
   dashboard_template = "skeleton3.qmd",
-  start_date = "1999-01-01",
   default_type = "X13",
   default_spec_nsa = "RSA2c",
   default_spec_sa = "RSA2c",
@@ -37,8 +36,6 @@ level3_validation(
 
 \item{dashboard_template}{name of dashboard template to use}
 
-\item{start_date}{Character defining start date in format "YYYY-MM-DD"}
-
 \item{default_type}{values should be "X13" or "TS" to define whether X13 or TRAMO-SEATS is used to test for decomposition mode}
 
 \item{default_spec_nsa}{name of a default JDemetra+ specification to use for tests on NSA series (default is  "RSA2c")}
@@ -56,6 +53,6 @@ Level 3 validation
 data(vintages, package = "SAvalidation")
 nsa <- ts(vintages$nsa_vert[,"2024-01-01"], start=1999, frequency = 4)
 sa <- ts(vintages$sa_vert[,"2024-01-01"], start=1999, frequency = 4)
-level3_validation(nsa,sa,"test","vintages")
+level3_validation(nsa,sa,"test",vintages)
 }
 }
